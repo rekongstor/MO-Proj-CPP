@@ -17,20 +17,21 @@ void QT::Draw(void* gr)
 	}
 }
 
-QT::QT() :	
-	point(0.,0.), 
-	w(1.), 
-	a(sqrt(.5), sqrt(.5)), 
-	depth(1), 
-	child00(nullptr), 
-	child01(nullptr), 
-	child10(nullptr), 
-	child11(nullptr), 
-	time(0.)
+QT::QT() :
+	point(0., 0.),
+	w(1.),
+	a(sqrt(.5), sqrt(.5)),
+	depth(1),
+	child00(nullptr),
+	child01(nullptr),
+	child10(nullptr),
+	child11(nullptr),
+	time(0.),
+	fi(PI/4.)
 {
 }
 
-QT::QT(xy point_, double w_, xy a_, int depth_, double time_) : 
+QT::QT(xy point_, double w_, xy a_, int depth_, double time_, double fi_) : 
 	point(point_),
 	w(w_),
 	a(a_),
@@ -39,7 +40,8 @@ QT::QT(xy point_, double w_, xy a_, int depth_, double time_) :
 	child01(nullptr),
 	child10(nullptr),
 	child11(nullptr),
-	time(time_)
+	time(time_),
+	fi(fi_)
 {
 }
 
@@ -66,10 +68,10 @@ void QT::Split(double x_, double y_)
 	QT* l = Get(x_, y_);
 	if (l->depth < max_depth)
 	{
-		l->child00 = new QT(xy(l->point.x, l->point.y), l->w / 2., l->a, l->depth + 1, l->time);
-		l->child01 = new QT(xy(l->point.x, l->point.y + l->w / 2.), l->w / 2., l->a, l->depth + 1, l->time);
-		l->child10 = new QT(xy(l->point.x + l->w / 2., l->point.y), w / 2., l->a, l->depth + 1, l->time);
-		l->child11 = new QT(xy(l->point.x + l->w / 2., l->point.y + l->w / 2.), l->w / 2., l->a, l->depth + 1, l->time);
+		l->child00 = new QT(xy(l->point.x, l->point.y), l->w / 2., l->a, l->depth + 1, l->time, fi);
+		l->child01 = new QT(xy(l->point.x, l->point.y + l->w / 2.), l->w / 2., l->a, l->depth + 1, l->time, fi);
+		l->child10 = new QT(xy(l->point.x + l->w / 2., l->point.y), w / 2., l->a, l->depth + 1, l->time, fi);
+		l->child11 = new QT(xy(l->point.x + l->w / 2., l->point.y + l->w / 2.), l->w / 2., l->a, l->depth + 1, l->time, fi);
 	}
 }
 
@@ -84,7 +86,11 @@ void QT::Randomize(double full_time)
 	}
 	else
 	{
-		a.x = Random();
-		a.y = Random();
+		// Random fi +- 15'
+		// ax = cos(fi)
+		// ay = sin(fi)
+		// TODO: Полярные координаты
+		a.x = (.5 - Random()) * 2.;
+		a.y = (.5 - Random()) * 2.;
 	}
 }

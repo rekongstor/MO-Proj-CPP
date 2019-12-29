@@ -5,6 +5,9 @@
 #include <objidl.h>
 #include <gdiplus.h>
 #include <random>
+
+const double PI = 3.141592653589793238463;
+
 using namespace Gdiplus;
 using namespace std;
 
