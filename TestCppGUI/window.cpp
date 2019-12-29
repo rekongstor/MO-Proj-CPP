@@ -37,6 +37,7 @@ void OnGenerate(HDC hdc)
     // поле с препятствиями
     graphics.SetClip(&region_1);
     field = Field();
+    robot = Robot();
     field.Draw(&graphics);
 }
 
@@ -52,9 +53,12 @@ void OnSimulate(HDC hdc)
     graphics.SetClip(&region_1);
     field.Draw(&graphics);
 
+    Simulate();
     // draw robot movement
 
     // draw quadtree
+    graphics.SetClip(&region_2);
+    robot.DrawQT(&graphics);
 }
 
 bool KeyDown(char key)

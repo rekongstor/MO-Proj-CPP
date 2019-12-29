@@ -1,12 +1,10 @@
 #include "robot.h"
 
-
 Robot::Robot()
 {
-
 }
 
-void Robot::Draw()
+void Robot::DrawQT(void* gr)
 {
-
+	q.Draw(gr);
 }

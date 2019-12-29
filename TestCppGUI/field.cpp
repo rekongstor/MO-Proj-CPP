@@ -3,7 +3,6 @@
 #include "field.h"
 using namespace Gdiplus;
 
-
 #ifndef FIELD
 Field::Field()
 {
@@ -26,12 +25,12 @@ void Field::Draw(void* gr)
 
 coll Field::Collision(xy start, xy end)
 {
-	coll ret(xy(0.0, 0.0), xy(0.0, 0.0));
+	coll ret(xy(10.0, 10.0), xy(0.0, 0.0));
 	for (auto o : obstacles)
 	{
 		coll tmp = o->Collision(start, end);
-		if (tmp.n.len() != 0.)
-			if (tmp.p.dist(start) < tmp.p.dist(start)) // если новая найденная коллизия ближе к началу. Такое может быть
+		if (tmp.normal.len() != 0.)
+			if (tmp.point.dist(start) < tmp.point.dist(start)) // если новая найденная коллизия ближе к началу. Такое может быть
 				ret = tmp;
 	}
 	return ret;
@@ -43,10 +42,10 @@ void Zone::Draw(void* gr)
 {
 	Graphics& graphics = *(Graphics*)gr;
 	SolidBrush br(Color(255, 0, 0));
-	int pixel_r = r * reg_w;
+	int pixel_r = radius * reg_w;
 	graphics.FillEllipse(&br, 
-		padding + p.x * reg_w - pixel_r,
-		padding + (1. - p.y) * reg_w - pixel_r,
+		padding + point.x * reg_w - pixel_r,
+		padding + (1. - point.y) * reg_w - pixel_r,
 		pixel_r * 2,
 		pixel_r * 2);
 }

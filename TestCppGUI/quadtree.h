@@ -1,23 +1,22 @@
 #pragma once
+#include "stdafx.h"
 
 struct QT
 {
-    double x, y, w;
-    virtual ~QT() {};
-    virtual QT* Get(double, double) = 0;
-    virtual void Draw() = 0;
-};
-
-struct QT_Parent : QT
-{
-    QT_Parent();
-    ~QT_Parent();
-
-};
-
-struct QT_Leaf : QT
-{
-    QT_Leaf();
-    ~QT_Leaf();
+    xy point;
+    double w; // место и размеры листа на поле
+    int depth;
+    double time;
+    QT *child00,
+       *child01,
+       *child10,
+       *child11;
+    xy a; // ускорение в листе
+    QT* Get(double x, double y);
+    void Draw(void* graphics);
+    QT();
+    QT(xy point_, double w_, xy a_, int depth_, double time_);
+    void Split(double x, double y);
+    void Randomize(double full_time);
 };
 

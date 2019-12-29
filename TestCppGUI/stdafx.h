@@ -25,9 +25,9 @@ struct xy
 
 struct coll
 {
-	xy p;						// Точка на плоскости 
-	xy n;						// Вектор нормали
-	coll(xy point, xy normal) : p(point), n(normal) {};
+	xy point;						// Точка на плоскости 
+	xy normal;						// Вектор нормали
+	coll(xy point_, xy normal_) : point(point_), normal(normal_) {};
 };
 
 const int reg_w = 400;			// размеры регионов
@@ -48,3 +48,7 @@ const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movem
 int Random(int min, int max);
 
 double Random();
+
+void Simulate();
+
+const int max_depth = 8;
