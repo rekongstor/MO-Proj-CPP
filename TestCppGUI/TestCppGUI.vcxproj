@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="field.cpp" />
+    <ClCompile Include="general.cpp" />
     <ClCompile Include="quadtree.cpp" />
     <ClCompile Include="robot.cpp" />
     <ClCompile Include="window.cpp" />

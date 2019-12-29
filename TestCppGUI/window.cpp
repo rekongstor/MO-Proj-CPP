@@ -22,8 +22,8 @@ void Prepare(Graphics& graphics)
 
     br.SetColor(Color(0, 0, 0));
     FontFamily fontFamily(L"Courier New");
-    Font font(&fontFamily, 20, FontStyleBold, UnitPixel);
-    graphics.DrawString(Tip, sizeof(Tip)/2, &font, PointF(text_x, text_y), &br);
+    Font font(&fontFamily, reg_w / 25, FontStyleBold, UnitPixel);
+    graphics.DrawString(Tip, sizeof(Tip)/2, &font, PointF(padding, reg_w + 2 * padding), &br);
 }
 
 void OnGenerate(HDC hdc)
@@ -36,6 +36,7 @@ void OnGenerate(HDC hdc)
     // рисуем первый регион
     // поле с препятствиями
     graphics.SetClip(&region_1);
+    field = Field();
     field.Draw(&graphics);
 }
 
@@ -191,6 +192,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
     GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR           gdiplusToken;
 
+
     // Initialize GDI+.
     GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
@@ -210,11 +212,11 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
     hWnd = CreateWindow(
         TEXT("Curvy robot"),   // window class name
         TEXT("Curvy robot"),  // window caption
-        WS_OVERLAPPEDWINDOW,      // window style
+        WS_OVERLAPPED | WS_SYSMENU,      // window style
         CW_USEDEFAULT,            // initial x position
         CW_USEDEFAULT,            // initial y position
-        reg2_x + reg_w + 40,            // initial x size
-        text_y + 120,            // initial y size
+        reg_w * 2 + 4 * padding,  // initial x size
+        reg_w + 8 * padding,      // initial y size
         NULL,                     // parent window handle
         NULL,                     // window menu handle
         hInstance,                // program instance handle

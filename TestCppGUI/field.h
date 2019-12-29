@@ -13,7 +13,7 @@ struct Zone : Obstacle
 	xy p;
 	double r;
 	Zone(xy point, double radius) : p(point), r(radius) {};
-	~Zone();
+	~Zone() {};
 	coll Collision(xy start, xy end);
 	void Draw(void* graphics); // рисует все препятствия (зоны)
 };

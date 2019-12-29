@@ -44,5 +44,8 @@
     <ClCompile Include="field.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="general.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

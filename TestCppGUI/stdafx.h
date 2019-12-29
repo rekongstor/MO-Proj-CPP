@@ -4,35 +4,47 @@
 #include <windows.h>
 #include <objidl.h>
 #include <gdiplus.h>
+#include <random>
 using namespace Gdiplus;
 using namespace std;
 
+struct Rnd
+{
+	Rnd();
+};
+
+const Rnd ra; // эта штука должна стоять тут, потому что она активирует конструктор, который задаёт рандом
 
 struct xy
 {
 	double x, y;
 	xy(double _x, double _y) : x(_x), y(_y) {};
+	double len();
+	double dist(xy dest);
 };
 
 struct coll
 {
-	xy p; // Point 
-	xy n; // Normal
+	xy p;						// Точка на плоскости 
+	xy n;						// Вектор нормали
 	coll(xy point, xy normal) : p(point), n(normal) {};
 };
 
-const int reg_w = 500; // размеры регионов
+const int reg_w = 400;			// размеры регионов
+const int small_zones[] =	{ 40, 80 };
+const double small_zone_size[] = { 0.01, 0.03 };
+const int big_zones[] =		{ 8, 16 };
+const double big_zone_size[] = { 0.05, 0.18 };
 
-const int reg1_x = 20; // координаты первого региона рисования
-const int reg1_y = 20;
 
-const int reg2_x = reg_w + 40; // координаты второго региона рисования
-const int reg2_y = 20;
+const int padding = reg_w / 20;	// отступ
 
-const int text_x = 20;
-const int text_y = reg_w + 40;
-
-const Rect r1(reg1_x, reg1_y, reg_w, reg_w);
-const Rect r2(reg2_x, reg2_y, reg_w, reg_w);
+const Rect r1(padding, padding, reg_w, reg_w);
+const Rect r2(reg_w + 2 * padding, padding, reg_w, reg_w);
 
 const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement\nPress 'Q' to stop simulation\0";
+
+
+int Random(int min, int max);
+
+double Random();

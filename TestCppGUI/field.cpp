@@ -3,18 +3,38 @@
 #include "field.h"
 using namespace Gdiplus;
 
+
 #ifndef FIELD
 Field::Field()
 {
 	obstacles.push_back(new Border()); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
-	obstacles.push_back(new Zone(xy(0.0,0.0),0.1));
+	for (int i = Random(small_zones[0], small_zones[1]); i > 0; --i)
+	{
+		obstacles.push_back(new Zone(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0]));
+	}	
+	for (int i = Random(big_zones[0], big_zones[1]); i > 0; --i)
+	{
+		obstacles.push_back(new Zone(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0]));
+	}
 }
-
 
 void Field::Draw(void* gr)
 {
 	for (auto o : obstacles)
 		o->Draw(gr);
+}
+
+coll Field::Collision(xy start, xy end)
+{
+	coll ret(xy(0.0, 0.0), xy(0.0, 0.0));
+	for (auto o : obstacles)
+	{
+		coll tmp = o->Collision(start, end);
+		if (tmp.n.len() != 0.)
+			if (tmp.p.dist(start) < tmp.p.dist(start)) // если новая найденная коллизия ближе к началу. Такое может быть
+				ret = tmp;
+	}
+	return ret;
 }
 #endif // !FIELD
 
@@ -25,27 +45,29 @@ void Zone::Draw(void* gr)
 	SolidBrush br(Color(255, 0, 0));
 	int pixel_r = r * reg_w;
 	graphics.FillEllipse(&br, 
-		reg1_x + p.x * reg_w - pixel_r, 
-		reg1_y + (1. - p.y) * reg_w - pixel_r,
+		padding + p.x * reg_w - pixel_r,
+		padding + (1. - p.y) * reg_w - pixel_r,
 		pixel_r * 2,
 		pixel_r * 2);
 }
 
 coll Zone::Collision(xy start, xy end)
 {
+	// TODO: запилить реализацию коллизии
+	// На входе старая и новая точка
+	// Если коллизия есть, то вернуть её и нормаль к поверхности
+	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
 	return coll(xy(0,0),xy(0,0));
-}
-
-Zone::~Zone()
-{
-
 }
 #endif // !ZONE
 
 #ifndef BORDER
 coll Border::Collision(xy start, xy end)
 {
+	// TODO: запилить реализацию коллизии
+	// На входе старая и новая точка
+	// Если коллизия есть, то вернуть её и нормаль к поверхности
+	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
 	return coll(xy(0, 0), xy(0, 0));
 }
-
 #endif // !BORDER
