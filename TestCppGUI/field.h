@@ -31,7 +31,7 @@ struct Field
 	std::vector<Obstacle*> obstacles;
 	Field();
 	void Draw(void* graphics);
-	coll Collision(xy start, xy end); // возвращает точку коллизии с препятствиями
+	coll Collision(const xy& start, xy& end); // возвращает точку коллизии с препятствиями
 };
 
 extern Field* field;

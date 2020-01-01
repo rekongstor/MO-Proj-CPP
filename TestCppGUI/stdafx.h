@@ -15,8 +15,13 @@ const float dt = 0.01f;
 const float Fmax = 1.;
 
 const int max_depth = 7;
-const int threads = 8;
-const int gen_size = 4096 / threads;
+const int l1 = 256;
+const int l2 = 128;
+const int l3 = 64;
+const int l4 = 32;
+
+const int threads = 4;
+const int gen_size = 1024 / threads;
 const int max_tries = 1024;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
@@ -32,6 +37,8 @@ using namespace std;
 struct Robot;
 struct QT;
 struct Field;
+struct Container;
+struct Mipmap;
 
 
 
@@ -39,14 +46,17 @@ struct xy
 {
 	float x, y;
 	xy(float _x, float _y) : x(_x), y(_y) {};
+	xy() : x(0.), y(0.) {};
 	float len();
 	float len2();
 	float dist(xy dest);
 	float dist2(xy dest);
+	bool operator!=(const xy&);
 };
 
 const xy xy00(0., 0.);
 const xy xy11(1., 1.);
+const xy xyxx(10., 10.);
 
 struct coll
 {
@@ -78,4 +88,4 @@ float Random();
 
 float clamp(float min, float x, float max);
 
-void Simulate(void**);
+void Simulate(Container&);

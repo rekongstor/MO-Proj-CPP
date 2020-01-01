@@ -1,10 +1,10 @@
 #include "robot.h"
 #include "field.h"
 
-Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.)
+Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.), c(xyxx,xyxx)
 {}
 
-Robot::Robot(const Robot& r) : coord(r.coord), speed(r.speed), life_time(r.life_time), q(QT(r.q)), fin_dist2(r.fin_dist2)
+Robot::Robot(const Robot& r) : coord(r.coord), speed(r.speed), life_time(r.life_time), q(QT(r.q)), fin_dist2(r.fin_dist2), c(r.c)
 {
 	q.Split(0.f, 0.f);
 }
@@ -35,7 +35,8 @@ void Robot::Simulate(void* gr)
 		speed.y += Fmax * leaf->a.y * dt;
 		leaf->time = life_time;
 
-		if (field->Collision(old_coord, coord).normal.len2() > 0.f)
+		c = field->Collision(old_coord, coord);
+		if (c.point.x <9.f)
 			stopped = true;
 
 		if (gr)

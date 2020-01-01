@@ -23,7 +23,7 @@ void Field::Draw(void* gr)
 		o->Draw(gr);
 }
 
-coll Field::Collision(xy start, xy end)
+coll Field::Collision(const xy& start, xy& end)
 {
 	coll ret(xy(10.0f, 10.0f), xy00);
 	for (auto o : obstacles)
@@ -33,6 +33,8 @@ coll Field::Collision(xy start, xy end)
 			if (ret.point.dist2(start) > tmp.point.dist2(start)) // если новая найденная коллизия ближе к началу. Такое может быть
 				ret = tmp;
 	}
+	if (ret.normal.len2() > 0.f)
+	end = ret.point;
 	return ret;
 }
 #endif // !FIELD
@@ -54,8 +56,12 @@ coll Zone::Collision(xy start, xy end)
 {
 	coll rez(end, xy00);
 	if (end.dist2(point) < radius2)
-		rez = coll(end, xy11);
-
+	{
+		rez = coll(end, xy(end.x - start.x, end.y - start.y));
+		float n = rez.normal.len();
+		rez.normal.x /= n;
+		rez.normal.y /= n;
+	}
 	// TODO: запилить реализацию коллизии
 	// На входе старая и новая точка
 	// Если коллизия есть, то вернуть её и нормаль к поверхности
@@ -68,9 +74,30 @@ coll Zone::Collision(xy start, xy end)
 coll Border::Collision(xy start, xy end)
 {
 	coll rez(end, xy00);
-	if (end.x < 0.f || end.x > 1.f || end.y < 0.f || end.y > 1.f)
-		rez = coll(end, xy11);
-	
+	if (end.x < 0.f)
+	{
+		rez.point = xy(0.f, end.y);
+		rez.normal = xy(1., 0.);
+		return rez;
+	}
+	if (end.y < 0.f)
+	{
+		rez.point = xy(end.x, 0.f);
+		rez.normal = xy(0., 1.);
+		return rez;
+	}
+	if (end.x > 1.f)
+	{
+		rez.point = xy(1.f, end.y);
+		rez.normal = xy(-1., 0.);
+		return rez;
+	}
+	if (end.y > 1.f)
+	{
+		rez.point = xy(end.x, 1.f);
+		rez.normal = xy(0., -1.);
+		return rez;
+	}
 	// TODO: запилить реализацию коллизии
 	// На входе старая и новая точка
 	// Если коллизия есть, то вернуть её и нормаль к поверхности

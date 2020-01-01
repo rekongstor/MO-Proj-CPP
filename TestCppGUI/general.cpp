@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "robot.h"
 #include "quadtree.h"
+#include "push.h"
 
 
 
-void Simulate(void** dest)
+void Simulate(Container& dest)
 {
 	array<Robot*, gen_size> bots;
 
@@ -41,7 +42,23 @@ void Simulate(void** dest)
 				best = b;
 		}
 	}
-	*dest = new Robot(*best);
+	dest.best = new Robot(*best);
+
+	for (auto& b : bots)
+	{
+			int i = (int)(b->coord.x * (float)(l1-1));
+			int j = (int)(b->coord.y * (float)(l1-1));
+			dest.mip->xyl1[i][j] = b->c.normal;
+			i /= 2;
+			j /= 2;
+			dest.mip->xyl2[i][j] = b->c.normal;
+			i /= 2;
+			j /= 2;
+			dest.mip->xyl3[i][j] = b->c.normal;
+			i /= 2;
+			j /= 2;
+			dest.mip->xyl4[i][j] = b->c.normal;
+	}
 	// для всех
 	for (auto& b : bots)
 		delete b;
@@ -61,6 +78,11 @@ int Random(int min, int max)
 float Random()
 {
 	return dist(mt);
+}
+
+bool xy::operator!=(const xy& r)
+{
+	return (x != r.x) && (y != r.y);
 }
 
 float xy::len()

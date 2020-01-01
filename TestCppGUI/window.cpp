@@ -2,12 +2,14 @@
 #include "field.h"
 #include "quadtree.h"
 #include "robot.h"
+#include "push.h"
 #pragma comment (lib,"Gdiplus.lib")
 
 Field* field;
 Robot* robot;
 
 set<char> Keys;
+Mipmap mipmap[threads];
 bool KeyDown(char key);
 bool want_stop = true;
 
@@ -62,23 +64,28 @@ void OnSimulate(HWND hWnd)
     robot = new Robot();
 
     vector<thread> thds;
-    array<Robot*, threads> thr_bots;
-    Robot* best;
+    array<Container, threads> thr_cont;
+	for (int i = 0; i < threads; ++i)
+	{
+		thr_cont[i].mip = &mipmap[i];
+		mipmap[i].Clear();
+	}
+    Container* best = &thr_cont[0];
     bool fin = false;
     
     int tries = max_tries;
     while ((robot->fin_dist2 > finish_dist2) && --tries > 0 && !want_stop)
     {
-        for (auto& t : thr_bots)
+        for (auto& t : thr_cont)
         {
 #ifdef threading
             thds.push_back(thread(
                 [&](void)
             {
-                Simulate((void**)&t);
+#endif
+                Simulate(t);
+#ifdef threading
             }));
-#else
-            Simulate((void**)&t);
 #endif
         }
 
@@ -86,37 +93,37 @@ void OnSimulate(HWND hWnd)
             t.join();
         thds.clear();
 
-        best = thr_bots[0];
+        best = &thr_cont[0];
 
-        for (auto b : thr_bots)
+        for (auto& b : thr_cont)
         {
-            if (b->fin_dist2 < finish_dist2)
+            if (b.best->fin_dist2 < finish_dist2)
             {
                 fin = true;
-                best = b;
+                best = &b;
             }
         }
 
-        for (auto p : thr_bots)
+        for (auto& p : thr_cont)
         {
             if (fin)
             {
-                if ((best->fin_dist2 > p->fin_dist2) && (best->life_time > p->life_time))
-                    best = p;
+                if ((best->best->fin_dist2 > p.best->fin_dist2) && (best->best->life_time > p.best->life_time))
+                    best = &p;
             }
             else
             {
-                if (best->fin_dist2 > p->fin_dist2)
-                    best = p;
+                if (best->best->fin_dist2 > p.best->fin_dist2)
+                    best = &p;
             }
         }
         if (best)
         {
             delete robot;
-            robot = new Robot(*best);
+            robot = new Robot(*best->best);
         }
-        for (auto b : thr_bots)
-            delete b;
+        for (auto& b : thr_cont)
+            delete b.best;
 
         InvalidateRect(hWnd, NULL, TRUE);
         hdc = BeginPaint(hWnd, &ps);
@@ -134,6 +141,8 @@ void OnSimulate(HWND hWnd)
         // рисуем его квадродерево
         graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
+		best->mip->Draw(&graphics);
+
         EndPaint(hWnd, &ps);
     }
     want_stop = true;
@@ -154,6 +163,7 @@ void OnSimulate(HWND hWnd)
     // рисуем его квадродерево
     graphics.SetClip(&region_2);
     robot->DrawQT(&graphics);
+	best->mip->Draw(&graphics);
     EndPaint(hWnd, &ps);
 
 
