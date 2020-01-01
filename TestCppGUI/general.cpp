@@ -51,13 +51,13 @@ void Simulate(Container& dest)
 			dest.mip->xyl1[i][j] = b->c.normal;
 			i /= 2;
 			j /= 2;
-			dest.mip->xyl2[i][j] = b->c.normal;
+			dest.mip->xyl2[i][j] = b->c.normal * 0.25f;
 			i /= 2;
 			j /= 2;
-			dest.mip->xyl3[i][j] = b->c.normal;
+			dest.mip->xyl3[i][j] = b->c.normal * 0.0625f;
 			i /= 2;
 			j /= 2;
-			dest.mip->xyl4[i][j] = b->c.normal;
+			dest.mip->xyl4[i][j] = b->c.normal * 0.015625f;
 	}
 	// для всех
 	for (auto& b : bots)
@@ -83,6 +83,13 @@ float Random()
 bool xy::operator!=(const xy& r)
 {
 	return (x != r.x) && (y != r.y);
+}
+
+xy& xy::operator*(const float& r)
+{
+	this->x *= r;
+	this->y *= r;
+	return *this;
 }
 
 float xy::len()

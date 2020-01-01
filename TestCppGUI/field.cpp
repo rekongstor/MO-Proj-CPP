@@ -77,35 +77,26 @@ coll Zone::Collision(xy start, xy end)
 #ifndef BORDER
 coll Border::Collision(xy start, xy end)
 {
-	coll rez(end, xy00);
 	if (end.x < 0.f)
 	{
-		rez.point = xy(0.f, end.y);
-		rez.normal = xy(1., 0.);
-		return rez;
+		return coll(xy(0.f, end.y), xy(1., 0.));
 	}
 	if (end.y < 0.f)
 	{
-		rez.point = xy(end.x, 0.f);
-		rez.normal = xy(0., 1.);
-		return rez;
+		return coll(xy(end.x, 0.f), xy(0., 1.));
 	}
 	if (end.x > 1.f)
 	{
-		rez.point = xy(1.f, end.y);
-		rez.normal = xy(-1., 0.);
-		return rez;
+		return coll(xy(1.f, end.y), xy(-1., 0.));
 	}
 	if (end.y > 1.f)
 	{
-		rez.point = xy(end.x, 1.f);
-		rez.normal = xy(0., -1.);
-		return rez;
+		return coll(xy(end.x, 1.f), xy(0., -1.));
 	}
 	// TODO: запилить реализацию коллизии
 	// На входе старая и новая точка
 	// Если коллизия есть, то вернуть её и нормаль к поверхности
 	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
-	return rez;
+	return coll(end, xy00);
 }
 #endif // !BORDER

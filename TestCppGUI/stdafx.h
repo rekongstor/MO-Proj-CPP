@@ -15,13 +15,13 @@ const float dt = 0.01f;
 const float Fmax = 1.;
 
 const int max_depth = 7;
-const int l1 = 256;
-const int l2 = 128;
-const int l3 = 64;
-const int l4 = 32;
+const int l1 = 1 << max_depth;
+const int l2 = 1 << (max_depth - 1);
+const int l3 = 1 << (max_depth - 2);
+const int l4 = 1 << (max_depth - 3);
 
 const int threads = 8;
-const int gen_size = 4096 / threads;
+const int gen_size = 2048 / threads;
 const int max_tries = 1024;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
@@ -52,6 +52,7 @@ struct xy
 	float dist(xy dest);
 	float dist2(xy dest);
 	bool operator!=(const xy&);
+	xy& operator*(const float&);
 };
 
 const xy xy00(0., 0.);
@@ -66,8 +67,8 @@ struct coll
 };
 
 const int reg_w = 512;			// размеры регионов
-//const int small_zones[] =	{ 4, 8 };
-const int small_zones[] =	{ 40, 80 };
+const int small_zones[] =	{ 4, 8 };
+//const int small_zones[] =	{ 40, 80 };
 const float small_zone_size[] = { 0.01, 0.03 };
 //const int big_zones[] =		{ 1, 1 };
 const int big_zones[] =		{ 8, 16 };
