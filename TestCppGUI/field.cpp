@@ -25,12 +25,12 @@ void Field::Draw(void* gr)
 
 coll Field::Collision(xy start, xy end)
 {
-	coll ret(xy(10.0, 10.0), xy(0.0, 0.0));
+	coll ret(xy(10.0f, 10.0f), xy00);
 	for (auto o : obstacles)
 	{
 		coll tmp = o->Collision(start, end);
-		if (tmp.normal.len() != 0.)
-			if (tmp.point.dist(start) < tmp.point.dist(start)) // если новая найденная коллизия ближе к началу. Такое может быть
+		if (tmp.normal.len2() > 0.f)
+			if (ret.point.dist2(start) > tmp.point.dist2(start)) // если новая найденная коллизия ближе к началу. Такое может быть
 				ret = tmp;
 	}
 	return ret;
@@ -44,29 +44,37 @@ void Zone::Draw(void* gr)
 	SolidBrush br(Color(255, 0, 0));
 	int pixel_r = radius * reg_w;
 	graphics.FillEllipse(&br, 
-		padding + point.x * reg_w - pixel_r,
-		padding + (1. - point.y) * reg_w - pixel_r,
+		padding + (int)(point.x * reg_w) - pixel_r,
+		padding + (int)((1.f - point.y) * reg_w) - pixel_r,
 		pixel_r * 2,
 		pixel_r * 2);
 }
 
 coll Zone::Collision(xy start, xy end)
 {
+	coll rez(end, xy00);
+	if (end.dist2(point) < radius2)
+		rez = coll(end, xy11);
+
 	// TODO: запилить реализацию коллизии
 	// На входе старая и новая точка
 	// Если коллизия есть, то вернуть её и нормаль к поверхности
 	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
-	return coll(xy(0,0),xy(0,0));
+	return rez;
 }
 #endif // !ZONE
 
 #ifndef BORDER
 coll Border::Collision(xy start, xy end)
 {
+	coll rez(end, xy00);
+	if (end.x < 0.f || end.x > 1.f || end.y < 0.f || end.y > 1.f)
+		rez = coll(end, xy11);
+	
 	// TODO: запилить реализацию коллизии
 	// На входе старая и новая точка
 	// Если коллизия есть, то вернуть её и нормаль к поверхности
 	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
-	return coll(xy(0, 0), xy(0, 0));
+	return rez;
 }
 #endif // !BORDER

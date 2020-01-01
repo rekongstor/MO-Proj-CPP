@@ -4,11 +4,12 @@
 #include "robot.h"
 #pragma comment (lib,"Gdiplus.lib")
 
-Field field;
-Robot robot;
+Field* field;
+Robot* robot;
 
 set<char> Keys;
-
+bool KeyDown(char key);
+bool want_stop = true;
 
 void Prepare(Graphics& graphics)
 {
@@ -20,14 +21,21 @@ void Prepare(Graphics& graphics)
     graphics.DrawRectangle(&pen, r2);
     graphics.FillRectangle(&br, r2);
 
-    br.SetColor(Color(0, 0, 0));
+    if (want_stop)
+        br.SetColor(Color(0, 0, 0));
+    else
+        br.SetColor(Color(255, 0, 0));
     FontFamily fontFamily(L"Courier New");
     Font font(&fontFamily, reg_w / 25, FontStyleBold, UnitPixel);
     graphics.DrawString(Tip, sizeof(Tip)/2, &font, PointF(padding, reg_w + 2 * padding), &br);
 }
 
-void OnGenerate(HDC hdc)
+void OnGenerate(HWND hWnd)
 {
+    PAINTSTRUCT  ps;
+    HDC          hdc;
+    InvalidateRect(hWnd, NULL, TRUE);
+    hdc = BeginPaint(hWnd, &ps);
     Graphics graphics(hdc);
     Prepare(graphics);
     Region region_1(r1); // первый регион рисования
@@ -36,13 +44,102 @@ void OnGenerate(HDC hdc)
     // рисуем первый регион
     // поле с препятствиями
     graphics.SetClip(&region_1);
-    field = Field();
-    robot = Robot();
-    field.Draw(&graphics);
+    delete field;
+    delete robot;
+    field = new Field();
+    robot = new Robot();
+    field->Draw(&graphics);
+
+    EndPaint(hWnd, &ps);
 }
 
-void OnSimulate(HDC hdc)
+void OnSimulate(HWND hWnd)
 {
+    want_stop = false;
+    PAINTSTRUCT  ps;
+    HDC          hdc;
+    delete robot;
+    robot = new Robot();
+
+    vector<thread> thds;
+    array<Robot*, threads> thr_bots;
+    Robot* best;
+    bool fin = false;
+    
+    int tries = max_tries;
+    while ((robot->fin_dist2 > finish_dist2) && --tries > 0 && !want_stop)
+    {
+        for (auto& t : thr_bots)
+        {
+#ifdef threading
+            thds.push_back(thread(
+                [&](void)
+            {
+                Simulate((void**)&t);
+            }));
+#else
+            Simulate((void**)&t);
+#endif
+        }
+
+        for (auto& t : thds)
+            t.join();
+        thds.clear();
+
+        best = thr_bots[0];
+
+        for (auto b : thr_bots)
+        {
+            if (b->fin_dist2 < finish_dist2)
+            {
+                fin = true;
+                best = b;
+            }
+        }
+
+        for (auto p : thr_bots)
+        {
+            if (fin)
+            {
+                if ((best->fin_dist2 > p->fin_dist2) && (best->life_time > p->life_time))
+                    best = p;
+            }
+            else
+            {
+                if (best->fin_dist2 > p->fin_dist2)
+                    best = p;
+            }
+        }
+        if (best)
+        {
+            delete robot;
+            robot = new Robot(*best);
+        }
+        for (auto b : thr_bots)
+            delete b;
+
+        InvalidateRect(hWnd, NULL, TRUE);
+        hdc = BeginPaint(hWnd, &ps);
+        Graphics graphics(hdc);
+        Prepare(graphics);
+        Region region_1(r1); // первый регион рисования
+        Region region_2(r2); // второй регион рисования
+
+        // рисуем первый регион
+        // поле с препятствиями
+        graphics.SetClip(&region_1);
+        field->Draw(&graphics);
+        // рисуем лучшего
+        robot->Simulate(&graphics);
+        // рисуем его квадродерево
+        graphics.SetClip(&region_2);
+        robot->DrawQT(&graphics);
+        EndPaint(hWnd, &ps);
+    }
+    want_stop = true;
+
+    InvalidateRect(hWnd, NULL, TRUE);
+    hdc = BeginPaint(hWnd, &ps);
     Graphics graphics(hdc);
     Prepare(graphics);
     Region region_1(r1); // первый регион рисования
@@ -51,14 +148,15 @@ void OnSimulate(HDC hdc)
     // рисуем первый регион
     // поле с препятствиями
     graphics.SetClip(&region_1);
-    field.Draw(&graphics);
-
-    Simulate();
-    // draw robot movement
-
-    // draw quadtree
+    field->Draw(&graphics);
+    // рисуем лучшего
+    robot->Simulate(&graphics);
+    // рисуем его квадродерево
     graphics.SetClip(&region_2);
-    robot.DrawQT(&graphics);
+    robot->DrawQT(&graphics);
+    EndPaint(hWnd, &ps);
+
+
 }
 
 bool KeyDown(char key)
@@ -77,112 +175,17 @@ bool KeyDown(char key)
     return false;
 }
 
-void Event(HWND hWnd, void(*callback)(HDC))
+void Event(HWND hWnd, void(*callback)(HWND))
 {
+
     PAINTSTRUCT  ps;
     HDC          hdc;
-
     InvalidateRect(hWnd, NULL, TRUE);
     hdc = BeginPaint(hWnd, &ps);
-    callback(hdc);
+    callback(hWnd);
     EndPaint(hWnd, &ps);
 }
 
-//void OnPaint2(HDC hdc)
-//{
-//    Graphics graphics(hdc);
-//    int green = 0;
-//    if (GetKeyState('A') & 0x8000)
-//        green = 255;
-//    SolidBrush br(Color(255- green, green, 0));
-//    graphics.FillEllipse(&br, rand() % 500, rand() % 500, 100, 100);
-//}
-//VOID OnPaint(HDC hdc)
-//{
-//    Graphics graphics(hdc);
-//    //Pen      pen(Color(255, 0, 0, 255));
-//    SolidBrush  solidBrush(Color(255, 0, 0, 255));
-//    //graphics.DrawLine(&pen, 0, 0, 200, 100);
-//    //
-//    //graphics.DrawEllipse(&pen, 0, 0, 200, 100);
-//    //graphics.FillEllipse(&brush, 200, 100, 200, 100);
-//
-//    //FontFamily  fontFamily(L"Times New Roman");
-//    //Font        font(&fontFamily, 24, FontStyleRegular, UnitPixel);
-//    //PointF      pointF(10.0f, 20.0f);
-//
-//    //graphics.DrawString(L"Hello World!", -1, &font, pointF, &brush);
-//    Point point(60, 10);
-//    // Assume that the variable "point" contains the location
-//    // of the most recent click.
-//    // To simulate a hit, assign (60, 10) to point.
-//    // To simulate a miss, assign (0, 0) to point.
-//    Rect rect(0,0,700,1000);
-//// Create a path that consists of a single polygon.
-//    Point polyPoints[] = { Point(10, 10), Point(150, 10),
-//       Point(100, 75), Point(100, 150) };
-//    GraphicsPath path;
-//    path.AddPolygon(polyPoints, 4);
-//    // Construct a region based on the path.
-//    //Region region(&path);
-//    Region region(rect);
-//    // Draw the outline of the region.
-//    Pen pen(Color(255, 0, 0, 0));
-//    graphics.DrawPath(&pen, &path);
-//    // Set the clipping region of the Graphics object.
-//    graphics.SetClip(&region);
-//    // Draw some clipped strings.
-//    FontFamily fontFamily(L"Arial");
-//    Font font(&fontFamily, 36, FontStyleBold, UnitPixel);
-//    graphics.DrawString(L"A Clipping Region", 20, &font,
-//        PointF(15, 25), &solidBrush);
-//    graphics.DrawString(L"A Clipping Region", 20, &font,
-//        PointF(15, 68), &solidBrush);
-//    
-//}
-//
-//VOID OnPaint2(HDC hdc)
-//{
-//    Graphics graphics(hdc);
-//    //Pen      pen(Color(255, 0, 0, 255));
-//    SolidBrush  solidBrush(Color(255, 0, 0, 255));
-//    //graphics.DrawLine(&pen, 0, 0, 200, 100);
-//    //
-//    //graphics.DrawEllipse(&pen, 0, 0, 200, 100);
-//    //graphics.FillEllipse(&brush, 200, 100, 200, 100);
-//
-//    //FontFamily  fontFamily(L"Times New Roman");
-//    //Font        font(&fontFamily, 24, FontStyleRegular, UnitPixel);
-//    //PointF      pointF(10.0f, 20.0f);
-//
-//    //graphics.DrawString(L"Hello World!", -1, &font, pointF, &brush);
-//    Point point(60, 10);
-//    // Assume that the variable "point" contains the location
-//    // of the most recent click.
-//    // To simulate a hit, assign (60, 10) to point.
-//    // To simulate a miss, assign (0, 0) to point.
-//    Rect rect(0, 0, 700, 1000);
-//    // Create a path that consists of a single polygon.
-//    Point polyPoints[] = { Point(10, 10), Point(150, 10),
-//       Point(100, 75), Point(100, 150) };
-//    GraphicsPath path;
-//    path.AddPolygon(polyPoints, 4);
-//    // Construct a region based on the path.
-//    //Region region(&path);
-//    Region region(rect);
-//    // Draw the outline of the region.
-//    Pen pen(Color(255, 0, 0, 0));
-//    graphics.DrawPath(&pen, &path);
-//    // Set the clipping region of the Graphics object.
-//    graphics.SetClip(&region);
-//    // Draw some clipped strings.
-//    FontFamily fontFamily(L"Arial");
-//    Font font(&fontFamily, 36, FontStyleBold, UnitPixel);
-//    graphics.DrawString(L"SAS", 20, &font,
-//        PointF(15, 25), &solidBrush);
-//    graphics.DrawString(L"SASAS", 20, &font,
-//        PointF(15, 68), &solidBrush);
-//}
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 

@@ -1,36 +1,88 @@
 #include "stdafx.h"
+#include "robot.h"
+#include "quadtree.h"
 
-SYSTEMTIME st;
-Rnd::Rnd()
+
+
+void Simulate(void** dest)
 {
-	if (st.wYear == 0)
+	array<Robot*, gen_size> bots;
+
+	for (int i = 0; i < gen_size; ++i)
+		bots[i] = new Robot(*robot);
+
+
+	bool fin = false;
+
+	Robot* best = bots[0];
+
+	for (auto& b : bots)
 	{
-		GetLocalTime(&st);
-		srand(st.wMilliseconds + st.wSecond * 1000);
+		b->q.Randomize(b->life_time);
+		b->Simulate();
+		if (b->fin_dist2 < finish_dist2)
+		{
+			fin = true;
+			best = b;
+		}
 	}
+
+
+	for (auto& b : bots)
+	{
+		if (fin) // ищем лучшего по времени
+		{
+			if ((best->fin_dist2 > b->fin_dist2) && (best->life_time > b->life_time))
+				best = b;
+		}
+		else // ищем лучшего по расстоянию
+		{
+			if (best->fin_dist2 > b->fin_dist2)
+				best = b;
+		}
+	}
+	*dest = new Robot(*best);
+	// для всех
+	for (auto& b : bots)
+		delete b;
 }
+
+std::random_device rd;
+
+std::mt19937 mt(rd());
+	std::uniform_real_distribution<double> dist(0.0, 1.0);
 
 int Random(int min, int max)
 {
-	uniform_int_distribution<int> distribution(min, max);
-	default_random_engine re;
-	return (distribution(re) + rand()) % (max - min + 1) + min;
+	std::uniform_int_distribution<int> dist(min, max);
+	return dist(mt);
 }
 
-double Random()
+float Random()
 {
-	uniform_real_distribution<double> distribution(0., 1.);
-	default_random_engine re;
-	double x = distribution(re) + (double)rand() / (double)RAND_MAX;
-	return x > 1. ? x - 1. : x;
+	return dist(mt);
 }
 
-double xy::len()
+float xy::len()
 {
 	return sqrt(x * x + y * y);
 }
 
-double xy::dist(xy dest)
+float xy::len2()
+{
+	return (x * x + y * y);
+}
+
+float xy::dist(xy dest)
 {
 	return sqrt((dest.x - x) * (dest.x - x) + (dest.y - y) * (dest.y - y));
+}
+float xy::dist2(xy dest)
+{
+	return (dest.x - x) * (dest.x - x) + (dest.y - y) * (dest.y - y);
+}
+
+float clamp(float min, float x, float max)
+{
+	return min(min, max(x, max));
 }

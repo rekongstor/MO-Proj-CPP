@@ -11,8 +11,9 @@ struct Obstacle
 struct Zone : Obstacle
 {
 	xy point;
-	double radius;
-	Zone(xy point_, double radius_) : point(point_), radius(radius_) {};
+	float radius;
+	float radius2;
+	Zone(xy point_, float radius_) : point(point_), radius(radius_), radius2(radius_* radius_){};
 	~Zone() {};
 	coll Collision(xy start, xy end);
 	void Draw(void* graphics); // рисует все препятствия (зоны)
@@ -33,4 +34,4 @@ struct Field
 	coll Collision(xy start, xy end); // возвращает точку коллизии с препятствиями
 };
 
-extern Field field;
+extern Field* field;

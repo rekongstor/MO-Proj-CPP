@@ -1,37 +1,40 @@
 #include "quadtree.h"
 
-void QT::Draw(void* gr)
+void QT::Draw(void* gr, float full_time)
 {
 	if (child00 != nullptr)
 	{
-		child00->Draw(gr);
-		child01->Draw(gr);
-		child10->Draw(gr);
-		child11->Draw(gr);
+		child00->Draw(gr, full_time);
+		child01->Draw(gr, full_time);
+		child10->Draw(gr, full_time);
+		child11->Draw(gr, full_time);
 	}
 	else
 	{
 		Graphics& graphics = *(Graphics*)gr;
-		SolidBrush br(Color((int)((a.x + 1.) / 2. * 255.), (int)((a.y + 1.) / 2. * 255.), 255));
-		graphics.FillRectangle(&br, 2 * padding + reg_w + (int)(point.x * reg_w), padding + (int)(((1 - point.y - w) * reg_w) ), (int)(w * reg_w), (int)(w * reg_w));
+		SolidBrush br(Color((int)((a.x + 1.f) / 2.f * 255.f), (int)((a.y + 1.f) / 2.f * 255.f), 255));
+		if (full_time > 0.f)
+			br.SetColor(Color((int)((a.x + 1.f) / 2.f * 255.f), (int)((a.y + 1.f) / 2.f * 255.f), (int)(time / full_time * 255.f)));
+
+		graphics.FillRectangle(&br, 2 * padding + reg_w + (int)(point.x * reg_w), padding + (int)(((1 - point.y - w) * reg_w)), (int)(w * reg_w), (int)(w * reg_w));
 	}
 }
 
 QT::QT() :
-	point(0., 0.),
-	w(1.),
-	a(sqrt(.5), sqrt(.5)),
-	depth(1),
+	point(0.f, 0.f),
+	w(1.f),
+	a(sqrt(.5f), sqrt(.5f)),
+	depth(0),
 	child00(nullptr),
 	child01(nullptr),
 	child10(nullptr),
 	child11(nullptr),
-	time(0.),
-	fi(PI/4.)
-{
-}
+	time(0.f),
+	fi(PI/4.f),
+	power(1.f)
+{}
 
-QT::QT(xy point_, double w_, xy a_, int depth_, double time_, double fi_) : 
+QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_) :
 	point(point_),
 	w(w_),
 	a(a_),
@@ -41,21 +44,52 @@ QT::QT(xy point_, double w_, xy a_, int depth_, double time_, double fi_) :
 	child10(nullptr),
 	child11(nullptr),
 	time(time_),
-	fi(fi_)
+	fi(fi_),
+	power(power_)
+{}
+
+QT::QT(const QT& q):
+	point(q.point),
+	w(q.w),
+	a(q.a),
+	depth(q.depth),
+	child00(nullptr),
+	child01(nullptr),
+	child10(nullptr),
+	child11(nullptr),
+	time(q.time),
+	fi(q.fi),
+	power(q.power)
 {
+	if (q.child00)
+		child00 = new QT(*q.child00);
+	if (q.child01)
+		child01 = new QT(*q.child01);
+	if (q.child10)
+		child10 = new QT(*q.child10);
+	if (q.child11)
+		child11 = new QT(*q.child11);
 }
 
-QT* QT::Get(double x_, double y_)
+QT::~QT()
+{
+	delete child00;
+	delete child01;
+	delete child10;
+	delete child11;
+}
+
+QT* QT::Get(float x_, float y_)
 {
 	if (child00 != nullptr)
 	{
-		if (x_ < point.x + w / 2.)
-			if (y_ < point.y + w / 2.)
+		if (x_ < point.x + w / 2.f)
+			if (y_ < point.y + w / 2.f)
 				return child00->Get(x_, y_);
 			else
 				return child01->Get(x_, y_);
 		else
-			if (y_ < point.y + w / 2.)
+			if (y_ < point.y + w / 2.f)
 				return child10->Get(x_, y_);
 			else
 				return child11->Get(x_, y_);
@@ -63,34 +97,85 @@ QT* QT::Get(double x_, double y_)
 	return this;
 }
 
-void QT::Split(double x_, double y_)
+void QT::Split(float x_, float y_)
 {
 	QT* l = Get(x_, y_);
 	if (l->depth < max_depth)
 	{
-		l->child00 = new QT(xy(l->point.x, l->point.y), l->w / 2., l->a, l->depth + 1, l->time, fi);
-		l->child01 = new QT(xy(l->point.x, l->point.y + l->w / 2.), l->w / 2., l->a, l->depth + 1, l->time, fi);
-		l->child10 = new QT(xy(l->point.x + l->w / 2., l->point.y), w / 2., l->a, l->depth + 1, l->time, fi);
-		l->child11 = new QT(xy(l->point.x + l->w / 2., l->point.y + l->w / 2.), l->w / 2., l->a, l->depth + 1, l->time, fi);
+		l->child00 = new QT(
+			xy(l->point.x, l->point.y), 
+			l->w / 2.f, 
+			l->a, 
+			l->depth + 1, 
+			l->time, 
+			l->fi,
+			l->power);
+		l->child01 = new QT(
+			xy(l->point.x, l->point.y + l->w / 2.f), 
+			l->w / 2.f, 
+			l->a, 
+			l->depth + 1, 
+			l->time, 
+			l->fi,
+			l->power);
+		l->child10 = new QT(
+			xy(l->point.x + l->w / 2.f, l->point.y),
+			l->w / 2.f, 
+			l->a, 
+			l->depth + 1, 
+			l->time, 
+			l->fi,
+			l->power);
+		l->child11 = new QT(
+			xy(l->point.x + l->w / 2.f, l->point.y + l->w / 2.f), 
+			l->w / 2.f, 
+			l->a, 
+			l->depth + 1, 
+			l->time, 
+			l->fi,
+			l->power);
 	}
 }
 
-void QT::Randomize(double full_time)
+void QT::Randomize(float full_time)
 {
-	if (child00 != nullptr)
+	if (full_time > 0.)
 	{
-		child00->Randomize(full_time);
-		child01->Randomize(full_time);
-		child10->Randomize(full_time);
-		child11->Randomize(full_time);
-	}
-	else
-	{
-		// Random fi +- 15'
-		// ax = cos(fi)
-		// ay = sin(fi)
-		// TODO: Полярные координаты
-		a.x = (.5 - Random()) * 2.;
-		a.y = (.5 - Random()) * 2.;
+		if (child00 != nullptr)
+		{
+			child00->Randomize(full_time);
+			child01->Randomize(full_time);
+			child10->Randomize(full_time);
+			child11->Randomize(full_time);
+		}
+		else
+		{
+			float time_coef = pow(time / full_time, 2.f);
+
+			//a.x += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;
+			//a.y += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;
+			//if (a.x > 1.f) a.x = 1.f;
+			//if (a.y > 1.f) a.y = 1.f;
+			//if (a.x < -1.f) a.x = -1.f;
+			//if (a.y < -1.f) a.y = -1.f;
+			//float n = a.len();
+			//a.x /= n;
+			//a.y /= n;
+			//float acmax = (Random() + 0.5f) / 1.5f;
+			//a.x *= acmax;
+			//a.y *= acmax;
+			//time = 0.f;
+
+			fi += (time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.01f * depth;
+
+			if (fi > 2 * PI)
+				fi -= 2 * PI;
+			if (fi < 0.f)
+				fi += 2 * PI;
+			power = 0.4f + Random() * 0.6f;
+			a.x = sin(fi) * power;
+			a.y = cos(fi) * power;
+			//time = 0.f;
+		}
 	}
 }

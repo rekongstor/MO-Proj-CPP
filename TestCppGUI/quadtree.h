@@ -4,20 +4,23 @@
 struct QT
 {
     xy point;
-    double w; // место и размеры листа на поле
+    float w; // место и размеры листа на поле
     int depth;
-    double time;
+    float time;
     QT *child00,
        *child01,
        *child10,
        *child11;
     xy a; // ускорение в листе
-    double fi; // направление ускорения
-    QT* Get(double x, double y);
-    void Draw(void* graphics);
+    float fi; // направление ускорения
+    float power; // сила ускорения
+    QT* Get(float x, float y);
+    void Draw(void* graphics, float full_time);
     QT();
-    QT(xy point_, double w_, xy a_, int depth_, double time_, double fi_);
-    void Split(double x, double y);
-    void Randomize(double full_time);
+    QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_);
+    QT(const QT&);
+    ~QT();
+    void Split(float x, float y);
+    void Randomize(float full_time);
 };
 
