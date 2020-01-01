@@ -54,19 +54,23 @@ void Zone::Draw(void* gr)
 
 coll Zone::Collision(xy start, xy end)
 {
-	coll rez(end, xy00);
+	if (end.x - point.x < radius) // axis aligned bounding box yay (aabb)
+	if (end.x - point.x > -radius) // axis aligned bounding box yay (aabb)
+	if (end.y - point.y < radius)
+	if (end.y - point.y > -radius)
 	if (end.dist2(point) < radius2)
 	{
-		rez = coll(end, xy(end.x - start.x, end.y - start.y));
+		coll rez(end, xy(end.x - start.x, end.y - start.y));
 		float n = rez.normal.len();
 		rez.normal.x /= n;
 		rez.normal.y /= n;
+		return rez;
 	}
 	// TODO: запилить реализацию коллизии
 	// На входе старая и новая точка
 	// Если коллизия есть, то вернуть её и нормаль к поверхности
 	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
-	return rez;
+	return coll(end, xy00);
 }
 #endif // !ZONE
 

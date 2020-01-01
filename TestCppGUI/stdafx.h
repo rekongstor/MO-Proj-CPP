@@ -20,8 +20,8 @@ const int l2 = 128;
 const int l3 = 64;
 const int l4 = 32;
 
-const int threads = 4;
-const int gen_size = 1024 / threads;
+const int threads = 8;
+const int gen_size = 4096 / threads;
 const int max_tries = 1024;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;

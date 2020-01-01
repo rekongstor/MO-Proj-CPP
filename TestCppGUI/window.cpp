@@ -141,7 +141,6 @@ void OnSimulate(HWND hWnd)
         // рисуем его квадродерево
         graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
-		best->mip->Draw(&graphics);
 
         EndPaint(hWnd, &ps);
     }
