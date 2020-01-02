@@ -168,7 +168,7 @@ void QT::Randomize(float full_time)
 				fi -= 2 * PI;
 			if (fi < 0.f)
 				fi += 2 * PI;
-			power = 0.2f + Random() * 0.8f;
+			power = 0.4f + Random() * 0.6f;
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
 			//time = 0.f;

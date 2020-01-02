@@ -5,8 +5,8 @@
 #include "push.h"
 #pragma comment (lib,"Gdiplus.lib")
 
-Field* field;
-Robot* robot;
+Field_p field;
+Robot_p robot;
 
 set<char> Keys;
 Mipmap mipmap[threads];
@@ -47,8 +47,8 @@ void OnGenerate(HWND hWnd)
     // рисуем первый регион
     // поле с препятствиями
     graphics.SetClip(&region_1);
-    field = new Field();
-    robot = new Robot();
+    field = make_shared<Field>();
+    robot = make_shared<Robot>();
     field->Draw(&graphics);
 
     EndPaint(hWnd, &ps);
@@ -59,7 +59,7 @@ void OnSimulate(HWND hWnd)
     want_stop = false;
     PAINTSTRUCT  ps;
     HDC          hdc;
-    robot = new Robot();
+    robot = make_shared<Robot>();
 
     vector<thread> thds;
     array<Container, threads> thr_cont;
@@ -120,7 +120,7 @@ void OnSimulate(HWND hWnd)
         }
         if (best)
         {
-            robot = new Robot(*best->best);
+            robot = make_shared<Robot>(*best->best);
             robot->q.Split(robot->coord.x, robot->coord.y);
         }
 
@@ -154,13 +154,13 @@ void OnSimulate(HWND hWnd)
                 bs.mip->xyl1[i][j] = b->c.normal * 0.5;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl2[i][j] = b->c.normal * 0.9;
+                bs.mip->xyl2[i][j] = b->c.normal * 0.8;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl3[i][j] = b->c.normal * 0.9;
+                bs.mip->xyl3[i][j] = b->c.normal * 0.8;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl4[i][j] = b->c.normal * 0.9;
+                bs.mip->xyl4[i][j] = b->c.normal * 0.8;
             }
     }
     want_stop = true;

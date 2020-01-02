@@ -34,4 +34,4 @@ struct Field
 	coll Collision(const xy& start, xy& end); // возвращает точку коллизии с препятствиями
 };
 
-extern Field* field;
+extern Field_p field;

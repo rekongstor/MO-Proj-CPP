@@ -19,4 +19,4 @@ struct Robot
 	void Simulate(void* gr = nullptr);
 };
 
-extern Robot* robot;
+extern Robot_p robot;

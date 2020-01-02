@@ -80,8 +80,8 @@ struct coll
 
 const int reg_w = 512;			// размеры регионов
 //const int small_zones[] =	{ 1, 1 };
-//const int small_zones[] =	{ 4, 8 };
-const int small_zones[] =	{ 50, 80 };
+const int small_zones[] =	{ 4, 8 };
+//const int small_zones[] =	{ 50, 80 };
 const float small_zone_size[] = { 0.03, 0.05 };
 //const int big_zones[] =		{ 1, 1 };
 const int big_zones[] =		{ 4, 8 };
