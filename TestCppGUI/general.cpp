@@ -7,8 +7,7 @@
 
 void Simulate(Container& dest)
 {
-	array<Robot*, gen_size> bots;
-
+	array<Robot*, gen_size> &bots = *dest.bots;
 	for (int i = 0; i < gen_size; ++i)
 		bots[i] = new Robot(*robot);
 
@@ -43,25 +42,8 @@ void Simulate(Container& dest)
 		}
 	}
 	dest.best = new Robot(*best);
+	dest.best->q.Split(dest.best->coord.x, dest.best->coord.y);
 
-	for (auto& b : bots)
-	{
-			int i = (int)(b->coord.x * (float)(l1-1));
-			int j = (int)(b->coord.y * (float)(l1-1));
-			dest.mip->xyl1[i][j] = b->c.normal;
-			i /= 2;
-			j /= 2;
-			dest.mip->xyl2[i][j] = b->c.normal * 0.25f;
-			i /= 2;
-			j /= 2;
-			dest.mip->xyl3[i][j] = b->c.normal * 0.0625f;
-			i /= 2;
-			j /= 2;
-			dest.mip->xyl4[i][j] = b->c.normal * 0.015625f;
-	}
-	// для всех
-	for (auto& b : bots)
-		delete b;
 }
 
 std::random_device rd;

@@ -1,5 +1,6 @@
 #include "robot.h"
 #include "field.h"
+#include "push.h"
 
 Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.), c(xyxx,xyxx)
 {}
@@ -25,12 +26,25 @@ void Robot::Simulate(void* gr)
 	QT* leaf;
 	while (!stopped)
 	{
-		if (++n > 5000)
+		if (++n > robot_steps)
 			stopped = true;
 		life_time += dt;
 		coord.x += speed.x * dt;
 		coord.y += speed.y * dt;
 		leaf = q.Get(coord.x, coord.y);
+		xy a = leaf->a; // узнаём ускорение
+		// меняем ускорение с учётом отталкивания. может рили его кукошить?
+		for (auto& m : mipmap)
+		{
+			xy push = m.GetA(coord);
+			if (push != xy00)
+			{
+				a.x += push.x;
+				a.y += push.y;
+				break;
+			}
+		}
+
 		speed.x += Fmax * leaf->a.x * dt;
 		speed.y += Fmax * leaf->a.y * dt;
 		leaf->time = life_time;
@@ -49,10 +63,6 @@ void Robot::Simulate(void* gr)
 		}
 
 		old_coord = coord;
-	}
-	if (!gr)
-	{
-		q.Split(coord.x, coord.y);
 	}
 	fin_dist2 = coord.dist2(xy11);
 }

@@ -5,8 +5,8 @@ struct Container
 {
 	Robot* best;
 	Mipmap* mip;
+	array<Robot*, gen_size>* bots;
 	Container();
-	void setmm(Mipmap*);
 };
 
 struct Mipmap
@@ -17,4 +17,5 @@ struct Mipmap
 	xy xyl4[l4][l4];
 	void Draw(void* gr);
 	void Clear();
+	const xy& GetA(const xy& coord);
 };

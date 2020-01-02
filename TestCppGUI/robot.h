@@ -13,7 +13,6 @@ struct Robot
 	QT q;
 	Robot();
 	Robot(const Robot&);
-	Robot& operator=(const Robot&);
 	~Robot();
 	void DrawQT(void* gr);
 	void Simulate(void* gr = nullptr);

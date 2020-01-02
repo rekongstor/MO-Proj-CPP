@@ -10,6 +10,7 @@ Robot* robot;
 
 set<char> Keys;
 Mipmap mipmap[threads];
+array<Robot*, gen_size> bots[threads];
 bool KeyDown(char key);
 bool want_stop = true;
 
@@ -69,6 +70,15 @@ void OnSimulate(HWND hWnd)
 	{
 		thr_cont[i].mip = &mipmap[i];
 		mipmap[i].Clear();
+
+        // для всех
+        for (auto& b : bots[i]) // чистим роботов
+            if (b != nullptr)
+            {
+                delete b;
+                b = nullptr;
+            }
+		thr_cont[i].bots = &bots[i];
 	}
     Container* best = &thr_cont[0];
     bool fin = false;
@@ -142,8 +152,25 @@ void OnSimulate(HWND hWnd)
         graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
         best->mip->Draw(&graphics);
-
         EndPaint(hWnd, &ps);
+
+        // обновляем зоны отталкивания
+        for (auto& bs : thr_cont)
+            for (auto& b : *bs.bots)
+            {
+                int i = (int)(b->coord.x * (float)(l1 - 1));
+                int j = (int)(b->coord.y * (float)(l1 - 1));
+                bs.mip->xyl1[i][j] = b->c.normal;
+                i /= 2;
+                j /= 2;
+                bs.mip->xyl2[i][j] = b->c.normal * 0.25f;
+                i /= 2;
+                j /= 2;
+                bs.mip->xyl3[i][j] = b->c.normal * 0.0625f;
+                i /= 2;
+                j /= 2;
+                bs.mip->xyl4[i][j] = b->c.normal * 0.015625f;
+            }
     }
     want_stop = true;
 

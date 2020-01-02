@@ -150,7 +150,7 @@ void QT::Randomize(float full_time)
 		}
 		else
 		{
-			float time_coef = pow(time / full_time, 2.f);
+			float time_coef = pow(time / full_time, 1.f);
 
 			//a.x += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;
 			//a.y += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;

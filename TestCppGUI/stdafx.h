@@ -20,9 +20,11 @@ const int l2 = 1 << (max_depth - 1);
 const int l3 = 1 << (max_depth - 2);
 const int l4 = 1 << (max_depth - 3);
 
+const int robot_steps = 1024;
+
 const int threads = 8;
 const int gen_size = 2048 / threads;
-const int max_tries = 1024;
+const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
 
@@ -67,12 +69,12 @@ struct coll
 };
 
 const int reg_w = 512;			// размеры регионов
-const int small_zones[] =	{ 4, 8 };
-//const int small_zones[] =	{ 40, 80 };
-const float small_zone_size[] = { 0.01, 0.03 };
+//const int small_zones[] =	{ 4, 8 };
+const int small_zones[] =	{ 50, 80 };
+const float small_zone_size[] = { 0.03, 0.05 };
 //const int big_zones[] =		{ 1, 1 };
-const int big_zones[] =		{ 8, 16 };
-const float big_zone_size[] = { 0.05, 0.18 };
+const int big_zones[] =		{ 4, 8 };
+const float big_zone_size[] = { 0.10, 0.20 };
 
 
 const int padding = reg_w / 20;	// отступ
@@ -81,7 +83,7 @@ const Rect r1(padding, padding, reg_w, reg_w);
 const Rect r2(reg_w + 2 * padding, padding, reg_w, reg_w);
 
 const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement"; //\mPress 'Q' to stop simulation\0";
-
+extern Mipmap mipmap[threads];
 
 int Random(int min, int max);
 

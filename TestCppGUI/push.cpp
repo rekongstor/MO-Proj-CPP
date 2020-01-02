@@ -1,12 +1,28 @@
 #include "push.h"
 
 
-Container::Container(): mip(nullptr), best(nullptr)
+Container::Container(): mip(nullptr), best(nullptr), bots(nullptr)
 {}
 
-void Container::setmm(Mipmap* m)
+const xy& Mipmap::GetA(const xy& coord)
 {
-	mip = m;
+	int i = (int)(coord.x * (float)(l1 - 1));
+	int j = (int)(coord.y * (float)(l1 - 1));
+	if (xyl1[i][j] != xy00)
+		return xyl1[i][j];
+	i /= 2;
+	j /= 2;
+	if (xyl2[i][j] != xy00)
+		return xyl1[i][j];
+	i /= 2;
+	j /= 2;
+	if (xyl3[i][j] != xy00)
+		return xyl1[i][j];
+	i /= 2;
+	j /= 2;
+	if (xyl4[i][j] != xy00)
+		return xyl1[i][j];
+	return xy00;
 }
 
 void Mipmap::Draw(void* gr)
@@ -19,7 +35,7 @@ void Mipmap::Draw(void* gr)
 			if (xyl2[i][j] != xy00)
 			{
 				br.SetColor(Color((xyl2[i][j].x + 1.f) * 127.f, ((xyl2[i][j].y + 1.f) * 127.f), 0));
-				graphics.FillEllipse(&br, 2 * padding + reg_w + i * reg_w / l2 - 4, padding + (reg_w - j * reg_w / l2) - 4, 9, 9);
+				graphics.FillEllipse(&br, 2 * padding + reg_w + i * reg_w / l2 - max_depth / 2, padding + (reg_w - j * reg_w / l2) - max_depth / 2, max_depth + 2, max_depth + 2);
 			}
 		}
 }
