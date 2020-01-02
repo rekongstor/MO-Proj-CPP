@@ -21,16 +21,24 @@ const int l2 = 1 << (max_depth - 1);
 const int l3 = 1 << (max_depth - 2);
 const int l4 = 1 << (max_depth - 3);
 
-const int robot_steps = 4096;
+const int robot_steps = 1024;
 
 const int threads = 8;
-const int gen_size = 2048 / threads;
+const int gen_size = 4096 * 2 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
 
 
 #define threading
+//#define true_random
+
+#ifndef true_random
+struct Rnd
+{
+	Rnd();
+};
+#endif
 
 const float PI = 3.141592653589793238463f;
 
@@ -42,7 +50,6 @@ struct QT;
 struct Field;
 struct Border;
 struct Zone;
-struct Obstacle;
 struct Container;
 struct Mipmap;
 
@@ -52,7 +59,6 @@ using QT_p = shared_ptr<QT>;
 using Field_p = shared_ptr<Field>;
 using Border_p = shared_ptr<Border>;
 using Zone_p = shared_ptr<Zone>;
-using Obstacle_p = shared_ptr<Obstacle>;
 
 struct xy
 {
@@ -80,8 +86,8 @@ struct coll
 
 const int reg_w = 512;			// размеры регионов
 //const int small_zones[] =	{ 1, 1 };
-const int small_zones[] =	{ 4, 8 };
-//const int small_zones[] =	{ 50, 80 };
+//const int small_zones[] =	{ 4, 8 };
+const int small_zones[] =	{ 50, 80 };
 const float small_zone_size[] = { 0.03, 0.05 };
 //const int big_zones[] =		{ 1, 1 };
 const int big_zones[] =		{ 4, 8 };
@@ -104,3 +110,5 @@ float Random();
 float clamp(float min, float x, float max);
 
 void Simulate(Container&);
+
+float cos(xy& a, xy& b);

@@ -5,6 +5,11 @@
 #include "push.h"
 #pragma comment (lib,"Gdiplus.lib")
 
+
+
+#ifndef true_random
+volatile Rnd rnd;
+#endif // !true_random
 Field_p field;
 Robot_p robot;
 
@@ -31,6 +36,21 @@ void Prepare(Graphics& graphics)
     FontFamily fontFamily(L"Courier New");
     Font font(&fontFamily, reg_w / 25, FontStyleBold, UnitPixel);
     graphics.DrawString(Tip, sizeof(Tip)/2, &font, PointF(padding, reg_w + 2 * padding), &br);
+}
+
+void OnStart(HWND hWnd)
+{
+    PAINTSTRUCT  ps;
+    HDC          hdc;
+    InvalidateRect(hWnd, NULL, TRUE);
+    hdc = BeginPaint(hWnd, &ps);
+    Graphics graphics(hdc);
+    Prepare(graphics);
+    Region region_1(r1); // первый регион рисования
+    Region region_2(r2); // второй регион рисования
+
+
+    EndPaint(hWnd, &ps);
 }
 
 void OnGenerate(HWND hWnd)
@@ -134,15 +154,15 @@ void OnSimulate(HWND hWnd)
         Region region_window(rf);
         // рисуем первый регион
         // поле с препятствиями
-        //graphics.SetClip(&region_1);
+        graphics.SetClip(&region_1);
         field->Draw(&graphics);
         // рисуем лучшего
         robot->Simulate(&graphics);
         // рисуем его квадродерево
-        //graphics.SetClip(&region_2);
+        graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
         best->mip->Draw(&graphics);
-        //graphics.SetClip(&region_window);
+        graphics.SetClip(&region_window);
         EndPaint(hWnd, &ps);
 
         // обновляем зоны отталкивания
@@ -151,40 +171,40 @@ void OnSimulate(HWND hWnd)
             {
                 int i = (int)(b->coord.x * (float)(l1 - 1));
                 int j = (int)(b->coord.y * (float)(l1 - 1));
-                bs.mip->xyl1[i][j] = b->c.normal * 0.5;
+                bs.mip->xyl1[i][j] = b->c.normal * 1.f;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl2[i][j] = b->c.normal * 0.8;
+                bs.mip->xyl2[i][j] = b->c.normal * 1.f;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl3[i][j] = b->c.normal * 0.8;
+                bs.mip->xyl3[i][j] = b->c.normal * 0.5f;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl4[i][j] = b->c.normal * 0.8;
+                bs.mip->xyl4[i][j] = b->c.normal * 0.5f;
             }
     }
     want_stop = true;
 
-    InvalidateRect(hWnd, NULL, TRUE);
-    hdc = BeginPaint(hWnd, &ps);
-    Graphics graphics(hdc);
-    graphics.Clear(Color::Wheat);
-    Prepare(graphics);
-    Region region_1(r1); // первый регион рисования
-    Region region_2(r2); // второй регион рисования
-    Region region_window(rf);
-    // рисуем первый регион
-    // поле с препятствиями
-    //graphics.SetClip(&region_1);
-    field->Draw(&graphics);
-    // рисуем лучшего
-    robot->Simulate(&graphics);
-    // рисуем его квадродерево
-    //graphics.SetClip(&region_2);
-    robot->DrawQT(&graphics);
-    best->mip->Draw(&graphics);
-    //graphics.SetClip(&region_window);
-    EndPaint(hWnd, &ps);
+    //InvalidateRect(hWnd, NULL, TRUE);
+    //hdc = BeginPaint(hWnd, &ps);
+    //Graphics graphics(hdc);
+    //graphics.Clear(Color::Wheat);
+    //Prepare(graphics);
+    //Region region_1(r1); // первый регион рисования
+    //Region region_2(r2); // второй регион рисования
+    //Region region_window(rf);
+    //// рисуем первый регион
+    //// поле с препятствиями
+    ////graphics.SetClip(&region_1);
+    //field->Draw(&graphics);
+    //// рисуем лучшего
+    //robot->Simulate(&graphics);
+    //// рисуем его квадродерево
+    ////graphics.SetClip(&region_2);
+    //robot->DrawQT(&graphics);
+    //best->mip->Draw(&graphics);
+    ////graphics.SetClip(&region_window);
+    //EndPaint(hWnd, &ps);
 
 
 }
@@ -238,7 +258,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
     wndClass.cbClsExtra = 0;
     wndClass.cbWndExtra = 0;
     wndClass.hInstance = hInstance;
-    wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wndClass.hIcon = (HICON)LoadImage(NULL, TEXT("robot.ico"), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
     wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
     wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
     wndClass.lpszMenuName = NULL;
@@ -278,7 +298,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     switch (message)
     {
     case WM_ACTIVATE:
-        Event(hWnd, OnGenerate);
+        Event(hWnd, OnStart);
         return 0;
     case WM_KEYDOWN:
     case WM_KEYUP:

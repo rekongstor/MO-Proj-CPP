@@ -5,6 +5,7 @@
 Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.), c(xyxx,xyxx)
 {
 	q.Split(0.f, 0.f);
+	q.Split(0.f, 0.f);
 }
 
 Robot::Robot(const Robot& r) : coord(r.coord), speed(r.speed), life_time(r.life_time), q(QT(r.q)), fin_dist2(r.fin_dist2), c(r.c)
@@ -43,18 +44,25 @@ void Robot::Simulate(void* gr)
 		coord.y += speed.y * dt;
 		leaf = q.Get(coord.x, coord.y);
 		xy a = leaf->a; // узнаём ускорение
-		float nn = a.len();
+		float na = a.len();
+		float nn = speed.len();
+		float push_power = 0.f;
+		xy push(0.f,0.f);
 		// меняем ускорение с учётом отталкивания. может рили его кукошить?
+		if (!(coord.x > 0.97f && coord.y > 0.97f) && !(coord.x < 0.03f && coord.y < 0.03f))
 		for (auto& m : mipmap)
 		{
-			xy push = m.GetA(coord);
-			if (push.len2() > 0.5f)
+			push = m.GetA(coord);
+			if (push.len2() > 0.f && speed.len2() > 0.f)
 			{
-				a.x += push.x;
-				a.y += push.y;
+				a.x /= na;
+				a.y /= na;
+				push_power = nn * push.len() * cos(speed, push) / dt;
+				a.x -= push.x * push_power;
+				a.y -= push.y * push_power;
 				float nnn = a.len();
-				a.x = a.x * nn / nnn;
-				a.y = a.y * nn / nnn;
+				a.x = a.x / nnn * na;
+				a.y = a.y / nnn * na;
 				break;
 			}
 		}
@@ -70,10 +78,12 @@ void Robot::Simulate(void* gr)
 		if (gr)
 		{
 			Graphics& graphics = *(Graphics*)gr;
-			SolidBrush br(Color(0, 0, 0));
-			
+			SolidBrush br(Color(static_cast<int>((push.x + 1.f) * 127.f), static_cast<int>((push.y + 1.f) * 127.f), static_cast<int>(push.len() * 255.f), 32));
+			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 3), (int)((1.f - coord.y) * reg_w + padding) - 3, 7, 7);
+			br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));
+			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 2), (int)((1.f - coord.y) * reg_w + padding) - 2, 5, 5);
+			br.SetColor(Color(0, 0, 0));
 			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 1), (int)((1.f - coord.y) * reg_w + padding) - 1, 3, 3);
-
 		}
 
 		old_coord = coord;

@@ -3,7 +3,10 @@
 #include "quadtree.h"
 #include "push.h"
 
-
+float cos(xy& a, xy& b)
+{
+	return (a.x * b.x + a.y * b.y) / a.len() / b.len();
+}
 
 void Simulate(Container& dest)
 {
@@ -44,21 +47,42 @@ void Simulate(Container& dest)
 	dest.best = Robot_p(new Robot(*best));
 }
 
+
+#ifdef true_random
 std::random_device rd;
 
 std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(0.0, 1.0);
-
+std::uniform_real_distribution<double> dist_r(0.0, 1.0);
 int Random(int min, int max)
 {
-	std::uniform_int_distribution<int> dist(min, max);
-	return dist(mt);
+	std::uniform_int_distribution<int> dist_i(min, max);
+	return dist_i(mt);
 }
 
 float Random()
 {
-	return dist(mt);
+	return dist_r(mt);
 }
+#else
+SYSTEMTIME st;
+
+Rnd::Rnd()
+{
+	GetLocalTime(&st);
+	srand(st.wMilliseconds + st.wSecond * 1000 + st.wMinute * 60 * 1000);
+}
+
+int Random(int min, int max)
+{
+	return rand() % (max - min + 1) + min;
+}
+
+float Random()
+{
+	return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+}
+#endif // true_random
+
 
 bool xy::operator!=(const xy& r)
 {

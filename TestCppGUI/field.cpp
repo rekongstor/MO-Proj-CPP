@@ -6,28 +6,28 @@ using namespace Gdiplus;
 #ifndef FIELD
 Field::Field()
 {
-	obstacles.push_back(Border_p(new Border)); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
+	border = (Border_p(new Border)); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
 	for (int i = Random(small_zones[0], small_zones[1]); i > 0; --i)
 	{
-		obstacles.push_back(Zone_p(new Zone(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0])));
+		obstacles.push_back(make_shared<Zone>(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0]));
 	}	
 	for (int i = Random(big_zones[0], big_zones[1]); i > 0; --i)
 	{
-		obstacles.push_back(Zone_p(new Zone(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0])));
+		obstacles.push_back(make_shared<Zone>(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0]));
 	}
 }
 
 
 void Field::Draw(void* gr)
 {
-	for (auto o : obstacles)
+	for (auto& o : obstacles)
 		o->Draw(gr);
 }
 
 coll Field::Collision(const xy& start, xy& end)
 {
-	coll ret(xy(10.0f, 10.0f), xy00);
-	for (auto o : obstacles)
+	coll ret = border->Collision(start, end);
+	for (auto& o : obstacles)
 	{
 		coll tmp = o->Collision(start, end);
 		if (tmp.normal.len2() > 0.f)
@@ -35,7 +35,7 @@ coll Field::Collision(const xy& start, xy& end)
 				ret = tmp;
 	}
 	if (ret.normal.len2() > 0.f)
-	end = ret.point;
+		end = ret.point;
 	return ret;
 }
 #endif // !FIELD
@@ -53,7 +53,7 @@ void Zone::Draw(void* gr)
 		pixel_r * 2);
 }
 
-coll Zone::Collision(xy start, xy end)
+coll Zone::Collision(const xy& start, xy& end)
 {
 	if (end.x - point.x < radius) // axis aligned bounding box yay (aabb)
 	if (end.x - point.x > -radius) // axis aligned bounding box yay (aabb)
@@ -61,10 +61,9 @@ coll Zone::Collision(xy start, xy end)
 	if (end.y - point.y > -radius)
 	if (end.dist2(point) < radius2)
 	{
-		coll rez(end, xy(start.x - end.x, start.y - end.y));
-		float n = rez.normal.len();
-		rez.normal.x /= n;
-		rez.normal.y /= n;
+		coll rez(end, xy(end.x - point.x, end.y - point.y));
+		rez.normal.x /= radius;
+		rez.normal.y /= radius;
 		return rez;
 	}
 	// TODO: запилить реализацию коллизии
@@ -76,7 +75,7 @@ coll Zone::Collision(xy start, xy end)
 #endif // !ZONE
 
 #ifndef BORDER
-coll Border::Collision(xy start, xy end)
+coll Border::Collision(const xy& start, xy& end)
 {
 	if (end.x < 0.f)
 	{
@@ -98,6 +97,6 @@ coll Border::Collision(xy start, xy end)
 	// На входе старая и новая точка
 	// Если коллизия есть, то вернуть её и нормаль к поверхности
 	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
-	return coll(end, xy00);
+	return coll(xy(10.0f, 10.0f), xy00);
 }
 #endif // !BORDER

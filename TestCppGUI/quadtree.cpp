@@ -146,8 +146,7 @@ void QT::Randomize(float full_time)
 		}
 		else
 		{
-			float time_coef = pow(time / full_time, 1.f);
-
+			float time_coef = time / full_time; // pow(time / full_time, 1.f);
 			//a.x += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;
 			//a.y += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;
 			//if (a.x > 1.f) a.x = 1.f;
@@ -162,13 +161,13 @@ void QT::Randomize(float full_time)
 			//a.y *= acmax;
 			//time = 0.f;
 
-			fi += (time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.01f * depth;
+			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.05f * (float)depth;
 
 			if (fi > 2 * PI)
 				fi -= 2 * PI;
 			if (fi < 0.f)
 				fi += 2 * PI;
-			power = 0.4f + Random() * 0.6f;
+			power = 0.5f + Random() * 0.5f;
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
 			//time = 0.f;
