@@ -10,7 +10,7 @@ Robot* robot;
 
 set<char> Keys;
 Mipmap mipmap[threads];
-array<Robot*, gen_size> bots[threads];
+array<Robot_p, gen_size> bots[threads];
 bool KeyDown(char key);
 bool want_stop = true;
 
@@ -19,10 +19,10 @@ void Prepare(Graphics& graphics)
     Pen pen(Color(0, 0, 0), 2.f);
     SolidBrush br(Color(255, 255, 255));
     // рисуем границы наших регионов
-    graphics.DrawRectangle(&pen, r1);
-    graphics.FillRectangle(&br, r1);
     graphics.DrawRectangle(&pen, r2);
     graphics.FillRectangle(&br, r2);
+    graphics.DrawRectangle(&pen, r1);
+    graphics.FillRectangle(&br, r1);
 
     if (want_stop)
         br.SetColor(Color(0, 0, 0));
@@ -47,8 +47,6 @@ void OnGenerate(HWND hWnd)
     // рисуем первый регион
     // поле с препятствиями
     graphics.SetClip(&region_1);
-    delete field;
-    delete robot;
     field = new Field();
     robot = new Robot();
     field->Draw(&graphics);
@@ -61,7 +59,6 @@ void OnSimulate(HWND hWnd)
     want_stop = false;
     PAINTSTRUCT  ps;
     HDC          hdc;
-    delete robot;
     robot = new Robot();
 
     vector<thread> thds;
@@ -72,12 +69,6 @@ void OnSimulate(HWND hWnd)
 		mipmap[i].Clear();
 
         // для всех
-        for (auto& b : bots[i]) // чистим роботов
-            if (b != nullptr)
-            {
-                delete b;
-                b = nullptr;
-            }
 		thr_cont[i].bots = &bots[i];
 	}
     Container* best = &thr_cont[0];
@@ -129,29 +120,29 @@ void OnSimulate(HWND hWnd)
         }
         if (best)
         {
-            delete robot;
             robot = new Robot(*best->best);
+            robot->q.Split(robot->coord.x, robot->coord.y);
         }
-        for (auto& b : thr_cont)
-            delete b.best;
 
         InvalidateRect(hWnd, NULL, TRUE);
         hdc = BeginPaint(hWnd, &ps);
         Graphics graphics(hdc);
+        graphics.Clear(Color::Wheat);
         Prepare(graphics);
         Region region_1(r1); // первый регион рисования
         Region region_2(r2); // второй регион рисования
-
+        Region region_window(rf);
         // рисуем первый регион
         // поле с препятствиями
-        graphics.SetClip(&region_1);
+        //graphics.SetClip(&region_1);
         field->Draw(&graphics);
         // рисуем лучшего
         robot->Simulate(&graphics);
         // рисуем его квадродерево
-        graphics.SetClip(&region_2);
+        //graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
         best->mip->Draw(&graphics);
+        //graphics.SetClip(&region_window);
         EndPaint(hWnd, &ps);
 
         // обновляем зоны отталкивания
@@ -160,16 +151,16 @@ void OnSimulate(HWND hWnd)
             {
                 int i = (int)(b->coord.x * (float)(l1 - 1));
                 int j = (int)(b->coord.y * (float)(l1 - 1));
-                bs.mip->xyl1[i][j] = b->c.normal;
+                bs.mip->xyl1[i][j] = b->c.normal * 0.5;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl2[i][j] = b->c.normal * 0.25f;
+                bs.mip->xyl2[i][j] = b->c.normal * 0.9;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl3[i][j] = b->c.normal * 0.0625f;
+                bs.mip->xyl3[i][j] = b->c.normal * 0.9;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl4[i][j] = b->c.normal * 0.015625f;
+                bs.mip->xyl4[i][j] = b->c.normal * 0.9;
             }
     }
     want_stop = true;
@@ -177,20 +168,22 @@ void OnSimulate(HWND hWnd)
     InvalidateRect(hWnd, NULL, TRUE);
     hdc = BeginPaint(hWnd, &ps);
     Graphics graphics(hdc);
+    graphics.Clear(Color::Wheat);
     Prepare(graphics);
     Region region_1(r1); // первый регион рисования
     Region region_2(r2); // второй регион рисования
-
+    Region region_window(rf);
     // рисуем первый регион
     // поле с препятствиями
-    graphics.SetClip(&region_1);
+    //graphics.SetClip(&region_1);
     field->Draw(&graphics);
     // рисуем лучшего
     robot->Simulate(&graphics);
     // рисуем его квадродерево
-    graphics.SetClip(&region_2);
+    //graphics.SetClip(&region_2);
     robot->DrawQT(&graphics);
-	best->mip->Draw(&graphics);
+    best->mip->Draw(&graphics);
+    //graphics.SetClip(&region_window);
     EndPaint(hWnd, &ps);
 
 

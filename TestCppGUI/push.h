@@ -3,9 +3,9 @@
 
 struct Container
 {
-	Robot* best;
+	Robot_p best;
 	Mipmap* mip;
-	array<Robot*, gen_size>* bots;
+	array<Robot_p, gen_size>* bots;
 	Container();
 };
 

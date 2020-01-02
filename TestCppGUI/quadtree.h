@@ -7,10 +7,10 @@ struct QT
     float w; // место и размеры листа на поле
     int depth;
     float time;
-    QT *child00,
-       *child01,
-       *child10,
-       *child11;
+    QT_p    child00,
+            child01,
+            child10,
+            child11;
     xy a; // ускорение в листе
     float fi; // направление ускорения
     float power; // сила ускорения

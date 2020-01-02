@@ -62,21 +62,17 @@ QT::QT(const QT& q):
 	power(q.power)
 {
 	if (q.child00)
-		child00 = new QT(*q.child00);
+		child00 = QT_p(new QT(*q.child00));
 	if (q.child01)
-		child01 = new QT(*q.child01);
+		child01 = QT_p(new QT(*q.child01));
 	if (q.child10)
-		child10 = new QT(*q.child10);
+		child10 = QT_p(new QT(*q.child10));
 	if (q.child11)
-		child11 = new QT(*q.child11);
+		child11 = QT_p(new QT(*q.child11));
 }
 
 QT::~QT()
 {
-	delete child00;
-	delete child01;
-	delete child10;
-	delete child11;
 }
 
 QT* QT::Get(float x_, float y_)
@@ -94,7 +90,7 @@ QT* QT::Get(float x_, float y_)
 			else
 				return child11->Get(x_, y_);
 	}
-	return this;
+	return (this);
 }
 
 void QT::Split(float x_, float y_)
@@ -102,7 +98,7 @@ void QT::Split(float x_, float y_)
 	QT* l = Get(x_, y_);
 	if (l->depth < max_depth)
 	{
-		l->child00 = new QT(
+		l->child00 = make_shared<QT>(
 			xy(l->point.x, l->point.y), 
 			l->w / 2.f, 
 			l->a, 
@@ -110,7 +106,7 @@ void QT::Split(float x_, float y_)
 			l->time, 
 			l->fi,
 			l->power);
-		l->child01 = new QT(
+		l->child01 = make_shared<QT>(
 			xy(l->point.x, l->point.y + l->w / 2.f), 
 			l->w / 2.f, 
 			l->a, 
@@ -118,7 +114,7 @@ void QT::Split(float x_, float y_)
 			l->time, 
 			l->fi,
 			l->power);
-		l->child10 = new QT(
+		l->child10 = make_shared<QT>(
 			xy(l->point.x + l->w / 2.f, l->point.y),
 			l->w / 2.f, 
 			l->a, 
@@ -126,7 +122,7 @@ void QT::Split(float x_, float y_)
 			l->time, 
 			l->fi,
 			l->power);
-		l->child11 = new QT(
+		l->child11 = make_shared<QT>(
 			xy(l->point.x + l->w / 2.f, l->point.y + l->w / 2.f), 
 			l->w / 2.f, 
 			l->a, 
@@ -172,7 +168,7 @@ void QT::Randomize(float full_time)
 				fi -= 2 * PI;
 			if (fi < 0.f)
 				fi += 2 * PI;
-			power = 0.4f + Random() * 0.6f;
+			power = 0.2f + Random() * 0.8f;
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
 			//time = 0.f;

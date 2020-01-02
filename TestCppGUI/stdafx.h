@@ -10,6 +10,7 @@
 #include <array>
 #include <iostream>
 #include <string>
+#include <memory>
 
 const float dt = 0.01f;
 const float Fmax = 1.;
@@ -20,7 +21,7 @@ const int l2 = 1 << (max_depth - 1);
 const int l3 = 1 << (max_depth - 2);
 const int l4 = 1 << (max_depth - 3);
 
-const int robot_steps = 1024;
+const int robot_steps = 4096;
 
 const int threads = 8;
 const int gen_size = 2048 / threads;
@@ -39,10 +40,19 @@ using namespace std;
 struct Robot;
 struct QT;
 struct Field;
+struct Border;
+struct Zone;
+struct Obstacle;
 struct Container;
 struct Mipmap;
 
 
+using Robot_p = shared_ptr<Robot>;
+using QT_p = shared_ptr<QT>;
+using Field_p = shared_ptr<Field>;
+using Border_p = shared_ptr<Border>;
+using Zone_p = shared_ptr<Zone>;
+using Obstacle_p = shared_ptr<Obstacle>;
 
 struct xy
 {
@@ -69,6 +79,7 @@ struct coll
 };
 
 const int reg_w = 512;			// размеры регионов
+//const int small_zones[] =	{ 1, 1 };
 //const int small_zones[] =	{ 4, 8 };
 const int small_zones[] =	{ 50, 80 };
 const float small_zone_size[] = { 0.03, 0.05 };
@@ -81,6 +92,7 @@ const int padding = reg_w / 20;	// отступ
 
 const Rect r1(padding, padding, reg_w, reg_w);
 const Rect r2(reg_w + 2 * padding, padding, reg_w, reg_w);
+const Rect rf(0, 0, reg_w * 2 + 4 * padding, reg_w + 8 * padding);
 
 const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement"; //\mPress 'Q' to stop simulation\0";
 extern Mipmap mipmap[threads];

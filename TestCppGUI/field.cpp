@@ -6,16 +6,17 @@ using namespace Gdiplus;
 #ifndef FIELD
 Field::Field()
 {
-	obstacles.push_back(new Border()); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
+	obstacles.push_back(Border_p(new Border)); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
 	for (int i = Random(small_zones[0], small_zones[1]); i > 0; --i)
 	{
-		obstacles.push_back(new Zone(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0]));
+		obstacles.push_back(Zone_p(new Zone(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0])));
 	}	
 	for (int i = Random(big_zones[0], big_zones[1]); i > 0; --i)
 	{
-		obstacles.push_back(new Zone(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0]));
+		obstacles.push_back(Zone_p(new Zone(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0])));
 	}
 }
+
 
 void Field::Draw(void* gr)
 {
@@ -60,7 +61,7 @@ coll Zone::Collision(xy start, xy end)
 	if (end.y - point.y > -radius)
 	if (end.dist2(point) < radius2)
 	{
-		coll rez(end, xy(end.x - start.x, end.y - start.y));
+		coll rez(end, xy(start.x - end.x, start.y - end.y));
 		float n = rez.normal.len();
 		rez.normal.x /= n;
 		rez.normal.y /= n;
@@ -79,19 +80,19 @@ coll Border::Collision(xy start, xy end)
 {
 	if (end.x < 0.f)
 	{
-		return coll(xy(0.f, end.y), xy(1., 0.));
+		return coll(xy(0.f, end.y), xy(1.f, 0.f));
 	}
 	if (end.y < 0.f)
 	{
-		return coll(xy(end.x, 0.f), xy(0., 1.));
+		return coll(xy(end.x, 0.f), xy(0.f, 1.f));
 	}
 	if (end.x > 1.f)
 	{
-		return coll(xy(1.f, end.y), xy(-1., 0.));
+		return coll(xy(1.f, end.y), xy(-1.f, 0.f));
 	}
 	if (end.y > 1.f)
 	{
-		return coll(xy(end.x, 1.f), xy(0., -1.));
+		return coll(xy(end.x, 1.f), xy(0.f, -1.f));
 	}
 	// TODO: запилить реализацию коллизии
 	// На входе старая и новая точка

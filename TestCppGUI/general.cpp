@@ -7,14 +7,14 @@
 
 void Simulate(Container& dest)
 {
-	array<Robot*, gen_size> &bots = *dest.bots;
+	array<Robot_p, gen_size> &bots = *dest.bots;
 	for (int i = 0; i < gen_size; ++i)
-		bots[i] = new Robot(*robot);
+		bots[i] = Robot_p(new Robot(*robot));
 
 
 	bool fin = false;
 
-	Robot* best = bots[0];
+	Robot_p best = bots[0];
 
 	for (auto& b : bots)
 	{
@@ -41,9 +41,7 @@ void Simulate(Container& dest)
 				best = b;
 		}
 	}
-	dest.best = new Robot(*best);
-	dest.best->q.Split(dest.best->coord.x, dest.best->coord.y);
-
+	dest.best = Robot_p(new Robot(*best));
 }
 
 std::random_device rd;
@@ -95,5 +93,5 @@ float xy::dist2(xy dest)
 
 float clamp(float min, float x, float max)
 {
-	return min(min, max(x, max));
+	return max(min, min(x, max));
 }

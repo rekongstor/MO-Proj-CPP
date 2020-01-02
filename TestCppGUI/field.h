@@ -28,7 +28,7 @@ struct Border : Obstacle
 
 struct Field
 {
-	std::vector<Obstacle*> obstacles;
+	std::vector<Obstacle_p> obstacles;
 	Field();
 	void Draw(void* graphics);
 	coll Collision(const xy& start, xy& end); // возвращает точку коллизии с препятствиями
