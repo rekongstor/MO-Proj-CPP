@@ -50,8 +50,8 @@ void Robot::Simulate(void* gr)
 		xy push(0.f,0.f);
 		// меняем ускорение с учётом отталкивания. может рили его кукошить?
 		if (!(coord.x > 0.97f && coord.y > 0.97f) && !(coord.x < 0.03f && coord.y < 0.03f))
-		for (auto& m : mipmap)
 		{
+			auto& m = mipmap;
 			push = m.GetA(coord);
 			if (push.len2() > 0.f && speed.len2() > 0.f)
 			{

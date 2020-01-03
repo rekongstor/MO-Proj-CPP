@@ -161,13 +161,13 @@ void QT::Randomize(float full_time)
 			//a.y *= acmax;
 			//time = 0.f;
 
-			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.05f * (float)depth;
+			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.01f * (float)depth;
 
 			if (fi > 2 * PI)
 				fi -= 2 * PI;
 			if (fi < 0.f)
 				fi += 2 * PI;
-			power = 0.5f + Random() * 0.5f;
+			power = clamp(0.1f, power + time_coef * time_coef * (Random() - 0.5f), 1.f);
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
 			//time = 0.f;

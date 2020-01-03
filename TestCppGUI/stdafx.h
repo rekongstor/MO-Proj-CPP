@@ -21,10 +21,10 @@ const int l2 = 1 << (max_depth - 1);
 const int l3 = 1 << (max_depth - 2);
 const int l4 = 1 << (max_depth - 3);
 
-const int robot_steps = 1024;
+const int robot_steps = 4096;
 
-const int threads = 8;
-const int gen_size = 4096 * 2 / threads;
+const int threads = 4;
+const int gen_size = 2048 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
@@ -101,7 +101,7 @@ const Rect r2(reg_w + 2 * padding, padding, reg_w, reg_w);
 const Rect rf(0, 0, reg_w * 2 + 4 * padding, reg_w + 8 * padding);
 
 const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement"; //\mPress 'Q' to stop simulation\0";
-extern Mipmap mipmap[threads];
+extern Mipmap mipmap;
 
 int Random(int min, int max);
 

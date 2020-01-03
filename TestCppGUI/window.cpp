@@ -14,7 +14,7 @@ Field_p field;
 Robot_p robot;
 
 set<char> Keys;
-Mipmap mipmap[threads];
+Mipmap mipmap;
 array<Robot_p, gen_size> bots[threads];
 bool KeyDown(char key);
 bool want_stop = true;
@@ -85,8 +85,8 @@ void OnSimulate(HWND hWnd)
     array<Container, threads> thr_cont;
 	for (int i = 0; i < threads; ++i)
 	{
-		thr_cont[i].mip = &mipmap[i];
-		mipmap[i].Clear();
+		thr_cont[i].mip = &mipmap;
+		mipmap.Clear();
 
         // для всех
 		thr_cont[i].bots = &bots[i];
@@ -174,13 +174,13 @@ void OnSimulate(HWND hWnd)
                 bs.mip->xyl1[i][j] = b->c.normal * 1.f;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl2[i][j] = b->c.normal * 1.f;
+                bs.mip->xyl2[i][j] = b->c.normal * .5f;
                 i /= 2;
                 j /= 2;
                 bs.mip->xyl3[i][j] = b->c.normal * 0.5f;
                 i /= 2;
                 j /= 2;
-                bs.mip->xyl4[i][j] = b->c.normal * 0.5f;
+                bs.mip->xyl4[i][j] = b->c.normal * 0.25f;
             }
     }
     want_stop = true;

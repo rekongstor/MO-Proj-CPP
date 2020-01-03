@@ -40,7 +40,7 @@ void Simulate(Container& dest)
 		}
 		else // ищем лучшего по расстоянию
 		{
-			if (best->fin_dist2 > b->fin_dist2)
+			if (best->fin_dist2 > b->fin_dist2 && b->c.point.x < 9.f)
 				best = b;
 		}
 	}
