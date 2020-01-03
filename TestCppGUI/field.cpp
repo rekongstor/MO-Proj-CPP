@@ -6,7 +6,7 @@ using namespace Gdiplus;
 #ifndef FIELD
 Field::Field()
 {
-	border = (Border_p(new Border)); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
+	border = make_shared<Border>(); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
 	for (int i = Random(small_zones[0], small_zones[1]); i > 0; --i)
 	{
 		obstacles.push_back(make_shared<Zone>(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0]));

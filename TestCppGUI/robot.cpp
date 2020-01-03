@@ -46,25 +46,22 @@ void Robot::Simulate(void* gr)
 		xy a = leaf->a; // узнаём ускорение
 		float na = a.len();
 		float nn = speed.len();
+		float super = coord.dist(xy00) * coord.dist(xy00);
 		float push_power = 0.f;
 		xy push(0.f,0.f);
 		// меняем ускорение с учётом отталкивания. может рили его кукошить?
-		if (!(coord.x > 0.97f && coord.y > 0.97f) && !(coord.x < 0.03f && coord.y < 0.03f))
+		auto& m = mipmap;
+		push = m.GetA(coord);
+		if (push.len2() > 0.f && speed.len2() > 0.f)
 		{
-			auto& m = mipmap;
-			push = m.GetA(coord);
-			if (push.len2() > 0.f && speed.len2() > 0.f)
-			{
-				a.x /= na;
-				a.y /= na;
-				push_power = nn * push.len() * cos(speed, push) / dt;
-				a.x -= push.x * push_power;
-				a.y -= push.y * push_power;
-				float nnn = a.len();
-				a.x = a.x / nnn * na;
-				a.y = a.y / nnn * na;
-				break;
-			}
+			a.x /= na;
+			a.y /= na;
+			push_power = nn * push.len() * cos(speed, push) / dt * super * super * super;
+			a.x -= push.x * push_power;
+			a.y -= push.y * push_power;
+			float nnn = a.len();
+			a.x = a.x / nnn * na;
+			a.y = a.y / nnn * na;
 		}
 
 		speed.x += Fmax * a.x * dt;
@@ -78,12 +75,12 @@ void Robot::Simulate(void* gr)
 		if (gr)
 		{
 			Graphics& graphics = *(Graphics*)gr;
-			SolidBrush br(Color(static_cast<int>((push.x + 1.f) * 127.f), static_cast<int>((push.y + 1.f) * 127.f), static_cast<int>(push.len() * 255.f), 32));
-			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 3), (int)((1.f - coord.y) * reg_w + padding) - 3, 7, 7);
-			br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));
+			SolidBrush br(Color(0, static_cast<int>(push.len() * 255.f), static_cast<int>(push.len() * 255.f)));
 			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 2), (int)((1.f - coord.y) * reg_w + padding) - 2, 5, 5);
-			br.SetColor(Color(0, 0, 0));
-			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 1), (int)((1.f - coord.y) * reg_w + padding) - 1, 3, 3);
+			//br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));
+			//graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 2), (int)((1.f - coord.y) * reg_w + padding) - 2, 5, 5);
+			//br.SetColor(Color(0, 0, 0));
+			//graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 1), (int)((1.f - coord.y) * reg_w + padding) - 1, 3, 3);
 		}
 
 		old_coord = coord;

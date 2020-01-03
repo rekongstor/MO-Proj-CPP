@@ -62,13 +62,13 @@ QT::QT(const QT& q):
 	power(q.power)
 {
 	if (q.child00)
-		child00 = QT_p(new QT(*q.child00));
+		child00 = make_shared<QT>(*q.child00);
 	if (q.child01)
-		child01 = QT_p(new QT(*q.child01));
+		child01 = make_shared<QT>(*q.child01);
 	if (q.child10)
-		child10 = QT_p(new QT(*q.child10));
+		child10 = make_shared<QT>(*q.child10);
 	if (q.child11)
-		child11 = QT_p(new QT(*q.child11));
+		child11 = make_shared<QT>(*q.child11);
 }
 
 QT::~QT()
@@ -147,21 +147,22 @@ void QT::Randomize(float full_time)
 		else
 		{
 			float time_coef = time / full_time; // pow(time / full_time, 1.f);
-			//a.x += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;
-			//a.y += time_coef * (Random() - 0.5f) * 2.0f + (Random() - 0.5f) * 0.01f * (float)depth;
-			//if (a.x > 1.f) a.x = 1.f;
-			//if (a.y > 1.f) a.y = 1.f;
-			//if (a.x < -1.f) a.x = -1.f;
-			//if (a.y < -1.f) a.y = -1.f;
-			//float n = a.len();
-			//a.x /= n;
-			//a.y /= n;
-			//float acmax = (Random() + 0.5f) / 1.5f;
-			//a.x *= acmax;
-			//a.y *= acmax;
-			//time = 0.f;
 
-			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.01f * (float)depth;
+			//if (time_coef * Random() < 0.50f / depth)
+			//{
+			//	fi += (time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 1.20f * (float)depth;
+
+			//	if (fi > 2 * PI)
+			//		fi -= 2 * PI;
+			//	if (fi < 0.f)
+			//		fi += 2 * PI;
+			//	power = clamp(0.1f, power + time_coef * (Random() - 0.5f), 1.f);
+			//	a.x = sin(fi) * power;
+			//	a.y = cos(fi) * power;
+			//}
+
+
+			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (1 - time_coef) * (1 - time_coef) * (Random() - 0.5f) * (float)depth * PI;
 
 			if (fi > 2 * PI)
 				fi -= 2 * PI;
@@ -170,7 +171,6 @@ void QT::Randomize(float full_time)
 			power = clamp(0.1f, power + time_coef * time_coef * (Random() - 0.5f), 1.f);
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
-			//time = 0.f;
 		}
 	}
 }

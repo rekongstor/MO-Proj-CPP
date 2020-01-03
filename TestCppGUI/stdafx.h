@@ -16,22 +16,22 @@ const float dt = 0.01f;
 const float Fmax = 1.;
 
 const int max_depth = 7;
-const int l1 = 1 << max_depth;
-const int l2 = 1 << (max_depth - 1);
-const int l3 = 1 << (max_depth - 2);
-const int l4 = 1 << (max_depth - 3);
+const int l1 = 1 << (max_depth + 1);
+const int l2 = 1 << (max_depth - 0);
+const int l3 = 1 << (max_depth - 1);
+const int l4 = 1 << (max_depth - 2);
 
 const int robot_steps = 4096;
 
-const int threads = 4;
-const int gen_size = 2048 / threads;
+const int threads = 8;
+const int gen_size = 8192 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
 
 
 #define threading
-//#define true_random
+#define true_random // не выключать при включенном threading
 
 #ifndef true_random
 struct Rnd
@@ -69,8 +69,9 @@ struct xy
 	float len2();
 	float dist(xy dest);
 	float dist2(xy dest);
-	bool operator!=(const xy&);
-	xy& operator*(const float&);
+	inline bool operator!=(const xy&);
+	xy operator*(const float&);
+	void operator+=(const xy&&);
 };
 
 const xy xy00(0., 0.);

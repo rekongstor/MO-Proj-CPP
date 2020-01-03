@@ -79,7 +79,7 @@ void OnSimulate(HWND hWnd)
     want_stop = false;
     PAINTSTRUCT  ps;
     HDC          hdc;
-    robot = make_shared<Robot>();
+    robot = Robot_p(new Robot);
 
     vector<thread> thds;
     array<Container, threads> thr_cont;
@@ -154,34 +154,21 @@ void OnSimulate(HWND hWnd)
         Region region_window(rf);
         // рисуем первый регион
         // поле с преп€тстви€ми
-        graphics.SetClip(&region_1);
+       // graphics.SetClip(&region_1);
         field->Draw(&graphics);
         // рисуем лучшего
         robot->Simulate(&graphics);
         // рисуем его квадродерево
-        graphics.SetClip(&region_2);
+        //graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
+        // обновл€ем зоны отталкивани€
+        for (auto& bs : thr_cont)
+            for (auto& b : *bs.bots)
+                bs.mip->Put(b->coord, b->c.normal);
         best->mip->Draw(&graphics);
         graphics.SetClip(&region_window);
         EndPaint(hWnd, &ps);
 
-        // обновл€ем зоны отталкивани€
-        for (auto& bs : thr_cont)
-            for (auto& b : *bs.bots)
-            {
-                int i = (int)(b->coord.x * (float)(l1 - 1));
-                int j = (int)(b->coord.y * (float)(l1 - 1));
-                bs.mip->xyl1[i][j] = b->c.normal * 1.f;
-                i /= 2;
-                j /= 2;
-                bs.mip->xyl2[i][j] = b->c.normal * .5f;
-                i /= 2;
-                j /= 2;
-                bs.mip->xyl3[i][j] = b->c.normal * 0.5f;
-                i /= 2;
-                j /= 2;
-                bs.mip->xyl4[i][j] = b->c.normal * 0.25f;
-            }
     }
     want_stop = true;
 

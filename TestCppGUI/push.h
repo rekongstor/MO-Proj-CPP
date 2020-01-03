@@ -18,4 +18,5 @@ struct Mipmap
 	void Draw(void* gr);
 	void Clear();
 	const xy& GetA(const xy& coord);
+	void Put(const xy& coord, const xy& normal);
 };

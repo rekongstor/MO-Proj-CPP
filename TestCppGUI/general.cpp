@@ -12,7 +12,7 @@ void Simulate(Container& dest)
 {
 	array<Robot_p, gen_size> &bots = *dest.bots;
 	for (int i = 0; i < gen_size; ++i)
-		bots[i] = Robot_p(new Robot(*robot));
+		bots[i] = make_shared<Robot>(*robot);
 
 
 	bool fin = false;
@@ -44,7 +44,7 @@ void Simulate(Container& dest)
 				best = b;
 		}
 	}
-	dest.best = Robot_p(new Robot(*best));
+	dest.best = make_shared<Robot>(*best);
 }
 
 
@@ -83,13 +83,18 @@ float Random()
 }
 #endif // true_random
 
+void xy::operator+=(const xy&& r)
+{
+	x += r.x;
+	y += r.y;
+}
 
 bool xy::operator!=(const xy& r)
 {
 	return (x != r.x) && (y != r.y);
 }
 
-xy& xy::operator*(const float& r)
+xy xy::operator*(const float& r)
 {
 	this->x *= r;
 	this->y *= r;
