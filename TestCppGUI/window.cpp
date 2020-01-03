@@ -154,12 +154,12 @@ void OnSimulate(HWND hWnd)
         Region region_window(rf);
         // рисуем первый регион
         // поле с препятствиями
-       // graphics.SetClip(&region_1);
+        graphics.SetClip(&region_1);
         field->Draw(&graphics);
         // рисуем лучшего
         robot->Simulate(&graphics);
         // рисуем его квадродерево
-        //graphics.SetClip(&region_2);
+        graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
         // обновляем зоны отталкивания
         for (auto& bs : thr_cont)

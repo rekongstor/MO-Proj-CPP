@@ -6,24 +6,34 @@ Container::Container(): mip(nullptr), best(nullptr), bots(nullptr)
 
 void Mipmap::Put(const xy& coord, const xy& normal)
 {
+	if (coord.y < 0.01f)
+		float m = coord.y;
 	int i = (int)(clamp(0.f, coord.x * (float)(l1 - 1), (float)(l1 - 1)));
 	int j = (int)(clamp(0.f, coord.y * (float)(l1 - 1), (float)(l1 - 1)));
 	if (xyl1[i][j].len2() == 0.f) // ускорению сюда ещё не задано
 	{
-		xyl1[i][j].x = normal.x * 1.f;
-		xyl1[i][j].y = normal.x * 1.f;
+		float nx = normal.x * 1.f;
+		float ny = normal.y * 1.f;
+		xyl1[i][j].x = nx;
+		xyl1[i][j].y = ny;
+		nx /= 0.0625f;
+		ny /= 0.0625f;
 		i /= 2;
 		j /= 2;
-		xyl2[i][j].x += normal.x * .5f;
-		xyl2[i][j].y += normal.x * .5f;
+		xyl2[i][j].x += nx;
+		xyl2[i][j].y += ny;
+		nx /= 0.0625f;
+		ny /= 0.0625f;
 		i /= 2;
 		j /= 2;
-		xyl3[i][j].x += normal.x * .25f;
-		xyl3[i][j].y += normal.x * .25f;
+		xyl3[i][j].x += nx;
+		xyl3[i][j].y += ny;
+		nx /= 0.0625f;
+		ny /= 0.0625f;
 		i /= 2;
 		j /= 2;
-		xyl4[i][j].x += normal.x * .125f;
-		xyl4[i][j].y += normal.x * .125f;
+		xyl4[i][j].x += nx;
+		xyl4[i][j].y += ny;
 	}
 }
 

@@ -17,14 +17,14 @@ const float Fmax = 1.;
 
 const int max_depth = 7;
 const int l1 = 1 << (max_depth + 1);
-const int l2 = 1 << (max_depth - 0);
-const int l3 = 1 << (max_depth - 1);
-const int l4 = 1 << (max_depth - 2);
+const int l2 = l1 >> 1;
+const int l3 = l2 >> 1;
+const int l4 = l3 >> 1;
 
 const int robot_steps = 4096;
 
 const int threads = 8;
-const int gen_size = 8192 / threads;
+const int gen_size = 1024 * 4 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
@@ -86,9 +86,9 @@ struct coll
 };
 
 const int reg_w = 512;			// размеры регионов
-//const int small_zones[] =	{ 1, 1 };
+const int small_zones[] =	{ 1, 1 };
 //const int small_zones[] =	{ 4, 8 };
-const int small_zones[] =	{ 50, 80 };
+//const int small_zones[] =	{ 50, 80 };
 const float small_zone_size[] = { 0.03, 0.05 };
 //const int big_zones[] =		{ 1, 1 };
 const int big_zones[] =		{ 4, 8 };
