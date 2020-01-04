@@ -162,7 +162,7 @@ void QT::Randomize(float full_time)
 			//}
 
 
-			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (1 - time_coef) * (1 - time_coef) * (Random() - 0.5f) * (float)depth * PI;
+			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.01f * (float)depth;
 
 			if (fi > 2 * PI)
 				fi -= 2 * PI;

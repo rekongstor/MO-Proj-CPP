@@ -44,27 +44,22 @@ void Robot::Simulate(void* gr)
 		coord.y += speed.y * dt;
 		leaf = q.Get(coord.x, coord.y);
 		xy a = leaf->a; // узнаём ускорение
-		float na = a.len();
+		
 		float nn = speed.len();
-		float super = coord.dist(xy00) + coord.dist(xy00);
-		float push_power = 0.f;
 		xy push(0.f,0.f);
 		// меняем ускорение с учётом отталкивания. может рили его кукошить?
-		auto& m = mipmap;
-		push = m.GetA(coord);
-		if (super > 0.01f)
+		push = mipmap.GetA(coord);
+		if (push.len2() > 0.f && speed.len2() > 0.f)
 		{
-			if (push.len2() > 0.f && speed.len2() > 0.f)
-			{
-				a.x /= na;
-				a.y /= na;
-				push_power = clamp(-1.f, nn * push.len() * cos(speed, push), 1.f);
-				a.x -= push.x * push_power;
-				a.y -= push.y * push_power;
-				float nnn = a.len();
-				a.x = a.x / nnn * na;
-				a.y = a.y / nnn * na;
-			}
+			float push_power;
+			a.x /= leaf->power;
+			a.y /= leaf->power;
+			push_power = clamp(-.01f, nn * push.len() * cos(speed, push), .01f);
+			a.x -= push.x * push_power;
+			a.y -= push.y * push_power;
+			float nnn = a.len();
+			a.x = a.x / nnn * leaf->power;
+			a.y = a.y / nnn * leaf->power;
 		}
 
 		speed.x += Fmax * a.x * dt;

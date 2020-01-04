@@ -15,6 +15,10 @@ struct Mipmap
 	xy xyl2[l2][l2];
 	xy xyl3[l3][l3];
 	xy xyl4[l4][l4];
+	int il1[l1][l1];
+	int il2[l2][l2];
+	int il3[l3][l3];
+	int il4[l4][l4];
 	void Draw(void* gr);
 	void Clear();
 	const xy& GetA(const xy& coord);
