@@ -30,6 +30,7 @@ void Robot::Simulate(void* gr)
 	coord.y = 0.f;
 	speed.x = 0.f;
 	speed.y = 0.f;
+	float rand_time = life_time;
 	life_time = 0.f;
 	bool stopped = false;
 	int n = 0;
@@ -43,6 +44,11 @@ void Robot::Simulate(void* gr)
 		coord.x += speed.x * dt;
 		coord.y += speed.y * dt;
 		leaf = q.Get(coord.x, coord.y);
+		if (!leaf->been)
+		{
+			leaf->Randomize(rand_time);
+			leaf->been = true;
+		}
 		xy a = leaf->a; // узнаём ускорение
 		
 		float nn = speed.len();

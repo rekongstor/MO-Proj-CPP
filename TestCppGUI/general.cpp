@@ -21,7 +21,7 @@ void Simulate(Container& dest)
 
 	for (auto& b : bots)
 	{
-		b->q.Randomize(b->life_time);
+		//b->q.Randomize(b->life_time);
 		b->Simulate();
 		if (b->fin_dist2 < finish_dist2)
 		{

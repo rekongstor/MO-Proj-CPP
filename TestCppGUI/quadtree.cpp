@@ -31,7 +31,8 @@ QT::QT() :
 	child11(nullptr),
 	time(0.f),
 	fi(PI/4.f),
-	power(1.f)
+	power(1.f),
+	been(false)
 {}
 
 QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_) :
@@ -45,7 +46,8 @@ QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float pow
 	child11(nullptr),
 	time(time_),
 	fi(fi_),
-	power(power_)
+	power(power_),
+	been(false)
 {}
 
 QT::QT(const QT& q):
@@ -59,7 +61,8 @@ QT::QT(const QT& q):
 	child11(nullptr),
 	time(q.time),
 	fi(q.fi),
-	power(q.power)
+	power(q.power),
+	been(false)
 {
 	if (q.child00)
 		child00 = make_shared<QT>(*q.child00);
@@ -172,5 +175,6 @@ void QT::Randomize(float full_time)
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
 		}
+		time = 0.f;
 	}
 }

@@ -14,6 +14,7 @@ struct QT
     xy a; // ускорение в листе
     float fi; // направление ускорения
     float power; // сила ускорения
+    bool been;
     QT* Get(float x, float y);
     void Draw(void* graphics, float full_time);
     QT();
