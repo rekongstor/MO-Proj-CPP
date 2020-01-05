@@ -86,11 +86,11 @@ void OnSimulate(HWND hWnd)
 	for (int i = 0; i < threads; ++i)
 	{
 		thr_cont[i].mip = &mipmap;
-		mipmap.Clear();
 
         // для всех
 		thr_cont[i].bots = &bots[i];
 	}
+    mipmap.Clear();
     Container* best = &thr_cont[0];
     bool fin = false;
     

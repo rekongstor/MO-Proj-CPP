@@ -63,7 +63,7 @@ void Robot::Simulate(void* gr)
 			
 			a.x /= leaf->power;
 			a.y /= leaf->power;
-			push_power = clamp(-leaf->power * 0.15f, nn * push_len * cos(speed, push), leaf->power * 0.15f);
+			push_power = clamp(-leaf->power * 10.f, nn * push_len * cos(speed, push), leaf->power * 10.f);
 			a.x -= push.x * push_power;
 			a.y -= push.y * push_power;
 			float nnn = a.len();
