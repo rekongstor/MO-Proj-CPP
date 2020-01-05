@@ -18,10 +18,11 @@ struct QT
     QT* Get(float x, float y);
     void Draw(void* graphics, float full_time);
     QT();
-    QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_);
+    QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_, bool been);
     QT(const QT&);
     ~QT();
     void Split(float x, float y);
     void Randomize(float full_time);
+    void CleanTimes();
 };
 

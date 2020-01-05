@@ -28,6 +28,9 @@ void Prepare(Graphics& graphics)
     graphics.FillRectangle(&br, r2);
     graphics.DrawRectangle(&pen, r1);
     graphics.FillRectangle(&br, r1);
+    br.SetColor(Color::Gray);
+    graphics.DrawRectangle(&pen, r3);
+    graphics.FillRectangle(&br, r3);
 
     if (want_stop)
         br.SetColor(Color(0, 0, 0));
@@ -48,6 +51,7 @@ void OnStart(HWND hWnd)
     Prepare(graphics);
     Region region_1(r1); // первый регион рисования
     Region region_2(r2); // второй регион рисования
+    Region region_3(r3); // второй регион рисования
 
 
     EndPaint(hWnd, &ps);
@@ -63,6 +67,7 @@ void OnGenerate(HWND hWnd)
     Prepare(graphics);
     Region region_1(r1); // первый регион рисования
     Region region_2(r2); // второй регион рисования
+    Region region_3(r3); // второй регион рисования
 
     // рисуем первый регион
     // поле с препятствиями
@@ -151,7 +156,7 @@ void OnSimulate(HWND hWnd)
         Prepare(graphics);
         Region region_1(r1); // первый регион рисования
         Region region_2(r2); // второй регион рисования
-        Region region_window(rf);
+        Region region_3(r3); // третий регион рисования
         // рисуем первый регион
         // поле с препятствиями
         graphics.SetClip(&region_1);
@@ -166,8 +171,8 @@ void OnSimulate(HWND hWnd)
             for (auto& bs : thr_cont)
                 for (auto& b : *bs.bots)
                     bs.mip->Put(b->coord, b->c.normal);
+        graphics.SetClip(&region_3);
         best->mip->Draw(&graphics);
-        graphics.SetClip(&region_window);
         EndPaint(hWnd, &ps);
 #endif
     }
@@ -180,20 +185,18 @@ void OnSimulate(HWND hWnd)
     Prepare(graphics);
     Region region_1(r1); // первый регион рисования
     Region region_2(r2); // второй регион рисования
-    Region region_window(rf);
+    Region region_3(r3); // третий регион рисования
     // рисуем первый регион
     // поле с препятствиями
     graphics.SetClip(&region_1);
     field->Draw(&graphics);
     // рисуем лучшего
     robot->Simulate(&graphics);
-    if (robot->fin_dist2 > finish_dist2)
-        int k = 1;
     // рисуем его квадродерево
     graphics.SetClip(&region_2);
     robot->DrawQT(&graphics);
-    best->mip->Draw(&graphics);
-    //graphics.SetClip(&region_window);
+    graphics.SetClip(&region_3);
+    mipmap.Draw(&graphics);
     EndPaint(hWnd, &ps);
 
 
@@ -262,7 +265,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         WS_OVERLAPPED | WS_SYSMENU,      // window style
         CW_USEDEFAULT,            // initial x position
         CW_USEDEFAULT,            // initial y position
-        reg_w * 2 + 4 * padding,  // initial x size
+        reg_w * 3 + 6 * padding,  // initial x size
         reg_w + 8 * padding,      // initial y size
         NULL,                     // parent window handle
         NULL,                     // window menu handle
@@ -296,6 +299,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
             Event(hWnd, OnGenerate);
         if (KeyDown('S'))
             Event(hWnd, OnSimulate);
+        if (GetKeyState(VK_SHIFT) & 0x8000)
+        {
+            if (KeyDown('1')) // размножить на разные клавиши
+                Event(hWnd, OnSimulate); // сюда вызов нужной функции
+        }
         return 0;
     case WM_DESTROY:
         PostQuitMessage(0);

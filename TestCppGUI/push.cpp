@@ -16,22 +16,22 @@ void Mipmap::Put(const xy& coord, const xy& normal)
 		il1[i][j] = 1;
 		xyl1[i][j].x = nx;
 		xyl1[i][j].y = ny;
-		nx *= 0.25f;
-		ny *= 0.25f;
+		//nx *= 0.5f;
+		//ny *= 0.5f;
 		i /= 2;
 		j /= 2;
 		xyl2[i][j].x = ((xyl2[i][j].x * il2[i][j]) + nx) / (il2[i][j] + 1);
 		xyl2[i][j].y = ((xyl2[i][j].y * il2[i][j]) + ny) / (il2[i][j] + 1);
 		++il2[i][j];
-		nx *= 0.25f;
-		ny *= 0.25f;
+		//nx *= 0.5f;
+		//ny *= 0.5f;
 		i /= 2;
 		j /= 2;
 		xyl3[i][j].x = ((xyl3[i][j].x * il3[i][j]) + nx) / (il3[i][j] + 1);
 		xyl3[i][j].y = ((xyl3[i][j].y * il3[i][j]) + ny) / (il3[i][j] + 1);
 		++il3[i][j];
-		nx *= 0.25f;
-		ny *= 0.25f;
+		//nx *= 0.5f;
+		//ny *= 0.5f;
 		i /= 2;
 		j /= 2;
 		xyl4[i][j].x = ((xyl4[i][j].x * il4[i][j]) + nx) / (il4[i][j] + 1);
@@ -193,11 +193,11 @@ void Mipmap::Draw(void* gr)
 		{
 			if (xyl1[i][j].len2() > 0.f)
 			{
-				float rg = (1.f+cos(xyl1[i][j],xy10))/2.f;
-				float gg = (1.f+cos(xyl1[i][j], xy2p3))/2.f;
-				float bg = (1.f+cos(xyl1[i][j], xy4p3))/2.f;
+				float rg = (1.f + cos(xyl1[i][j], xy10)) / 2.f;
+				float gg = (1.f + cos(xyl1[i][j], xy2p3)) / 2.f;
+				float bg = (1.f + cos(xyl1[i][j], xy4p3)) / 2.f;
 				br.SetColor(Color(rg * 255.f, bg * 255.f, gg * 255.f));
-				graphics.FillEllipse(&br, 2 * padding + reg_w + i * reg_w / l1 - 1, padding + (reg_w - j * reg_w / l1) - 3, 3, 3);
+				graphics.FillEllipse(&br, 3 * padding + reg_w * 2 + i * reg_w / l1 + 1, padding + (reg_w - j * reg_w / l1) - 5, 3, 3);
 			}
 		}
 }
@@ -236,6 +236,6 @@ void Mipmap::Clear()
 		for (auto& j : i)
 			j = 0;
 
-	Put(xy11, xyxx);
+	Put(xy11, xy11);
 	//Put(xy00, xy11);
 }

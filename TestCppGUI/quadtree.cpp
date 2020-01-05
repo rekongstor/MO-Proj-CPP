@@ -11,12 +11,35 @@ void QT::Draw(void* gr, float full_time)
 	}
 	else
 	{
+		xy xy10(0.f, 1.f);
+		xy xy2p3(-.86603f, -.5f);
+		xy xy4p3(.86603f, -.5f);
+		float rg = (1.f + cos(a, xy10)) / 2.f;
+		float gg = (1.f + cos(a, xy2p3)) / 2.f;
+		float bg = (1.f + cos(a, xy4p3)) / 2.f;
+		float time_coef = time / full_time * time / full_time;
 		Graphics& graphics = *(Graphics*)gr;
-		SolidBrush br(Color((int)((a.x + 1.f) / 2.f * 255.f), (int)((a.y + 1.f) / 2.f * 255.f), 255));
-		if (full_time > 0.f)
-			br.SetColor(Color((int)((a.x + 1.f) / 2.f * 255.f), (int)((a.y + 1.f) / 2.f * 255.f), (int)(time / full_time * 255.f)));
+		SolidBrush br(Color((int)(rg * 255.f * time_coef), (int)(gg * 255.f * time_coef), (int)(bg * 255.f * time_coef)));
+		//if (full_time > 0.f)
+		//	br.SetColor(Color((int)((a.x + 1.f) / 2.f * 255.f), (int)((a.y + 1.f) / 2.f * 255.f), (int)(time / full_time * 255.f)));
 
 		graphics.FillRectangle(&br, 2 * padding + reg_w + (int)(point.x * reg_w), padding + (int)(((1 - point.y - w) * reg_w)), (int)(w * reg_w), (int)(w * reg_w));
+	}
+}
+void QT::CleanTimes()
+{
+	if (child00 != nullptr)
+	{
+		child00->CleanTimes();
+		child01->CleanTimes();
+		child10->CleanTimes();
+		child11->CleanTimes();
+	}
+	else
+	{
+		if (!been)
+			time = 0.f;
+		been = false;
 	}
 }
 
@@ -35,7 +58,7 @@ QT::QT() :
 	been(false)
 {}
 
-QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_) :
+QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_, bool been_) :
 	point(point_),
 	w(w_),
 	a(a_),
@@ -47,7 +70,7 @@ QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float pow
 	time(time_),
 	fi(fi_),
 	power(power_),
-	been(false)
+	been(been_)
 {}
 
 QT::QT(const QT& q):
@@ -108,7 +131,8 @@ void QT::Split(float x_, float y_)
 			l->depth + 1, 
 			l->time, 
 			l->fi,
-			l->power);
+			l->power,
+			l->been);
 		l->child01 = make_shared<QT>(
 			xy(l->point.x, l->point.y + l->w / 2.f), 
 			l->w / 2.f, 
@@ -116,7 +140,8 @@ void QT::Split(float x_, float y_)
 			l->depth + 1, 
 			l->time, 
 			l->fi,
-			l->power);
+			l->power,
+			l->been);
 		l->child10 = make_shared<QT>(
 			xy(l->point.x + l->w / 2.f, l->point.y),
 			l->w / 2.f, 
@@ -124,7 +149,8 @@ void QT::Split(float x_, float y_)
 			l->depth + 1, 
 			l->time, 
 			l->fi,
-			l->power);
+			l->power,
+			l->been);
 		l->child11 = make_shared<QT>(
 			xy(l->point.x + l->w / 2.f, l->point.y + l->w / 2.f), 
 			l->w / 2.f, 
@@ -132,7 +158,8 @@ void QT::Split(float x_, float y_)
 			l->depth + 1, 
 			l->time, 
 			l->fi,
-			l->power);
+			l->power,
+			l->been);
 	}
 }
 
@@ -165,7 +192,7 @@ void QT::Randomize(float full_time)
 			//}
 
 
-			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.01f * (float)depth;
+			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.03f / (float)depth;
 
 			if (fi > 2 * PI)
 				fi -= 2 * PI;

@@ -22,6 +22,7 @@ void Simulate(Container& dest)
 	for (auto& b : bots)
 	{
 		b->Simulate();
+		b->q.CleanTimes();
 		if (b->fin_dist2 < finish_dist2)
 		{
 			fin = true;

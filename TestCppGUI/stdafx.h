@@ -16,7 +16,7 @@
 const float dt = 0.01f;
 const float Fmax = 1.;
 
-const int max_depth = 7;
+const int max_depth = 6;
 const int l1 = 1 << (max_depth + 1);
 const int l2 = l1 >> 1;
 const int l3 = l2 >> 1;
@@ -25,7 +25,7 @@ const int l4 = l3 >> 1;
 const int robot_steps = 4096;
 
 const int threads = 8;
-const int gen_size = 1024 * 16 / threads;
+const int gen_size = 1024 * 32 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
@@ -101,7 +101,7 @@ const int padding = reg_w / 20;	// отступ
 
 const Rect r1(padding, padding, reg_w, reg_w);
 const Rect r2(reg_w + 2 * padding, padding, reg_w, reg_w);
-const Rect rf(0, 0, reg_w * 2 + 4 * padding, reg_w + 8 * padding);
+const Rect r3(padding * 3 + reg_w * 2, padding, reg_w, reg_w);
 
 const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement"; //\mPress 'Q' to stop simulation\0";
 extern Mipmap mipmap;

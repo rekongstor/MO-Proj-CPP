@@ -5,7 +5,9 @@
 Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.), c(xyxx,xyxx)
 {
 	q.Split(0.f, 0.f);
-	//q.Split(0.f, 0.f);
+	q.Split(0.f, 0.f);
+	q.Split(0.f, 0.f);
+	q.Split(0.f, 0.f);
 }
 
 Robot::Robot(const Robot& r) : coord(r.coord), speed(r.speed), life_time(r.life_time), q(QT(r.q)), fin_dist2(r.fin_dist2), c(r.c)
@@ -57,18 +59,18 @@ void Robot::Simulate(void* gr)
 		// меняем ускорение с учётом отталкивания. может рили его кукошить?
 		push = mipmap.GetA(coord);
 		float push_len = push.len();
-		if (push.len2() > 0.f && speed.len2() > 0.f)
+		float push_power = 0.f;
+		if (push_len > 0.f && nn > 0.f)
 		{
-			float push_power;
 			
 			a.x /= leaf->power;
 			a.y /= leaf->power;
-			push_power = clamp(-leaf->power * 10.f, nn * push_len * cos(speed, push), leaf->power * 10.f);
+			push_power = nn * push_len * cos(speed, push) / dt;
 			a.x -= push.x * push_power;
 			a.y -= push.y * push_power;
 			float nnn = a.len();
-			a.x = a.x / nnn * leaf->power;
-			a.y = a.y / nnn * leaf->power;
+			a.x = a.x / nnn;
+			a.y = a.y / nnn;
 		}
 
 		speed.x += Fmax * a.x * dt;
@@ -88,7 +90,7 @@ void Robot::Simulate(void* gr)
 			float gg = (1.f + cos(push, xy2p3)) / 2.f;
 			float bg = (1.f + cos(push, xy4p3)) / 2.f;
 			Graphics& graphics = *(Graphics*)gr;
-			SolidBrush br(Color(static_cast<int>(rg * push_len * 255.f), static_cast<int>(bg * push_len * 255.f), static_cast<int>(gg * push_len * 255.f)));
+			SolidBrush br(Color(static_cast<int>(rg * clamp(0.f, -push_power,1.f) * 255.f), static_cast<int>(bg * clamp(0.f, -push_power, 1.f) * 255.f), static_cast<int>(gg * clamp(0.f, -push_power, 1.f) * 255.f)));
 			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding)) - 1, (int)((1.f - coord.y) * reg_w + padding) - 1, 3, 3);
 			//br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));
 			//graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 2), (int)((1.f - coord.y) * reg_w + padding) - 2, 5, 5);

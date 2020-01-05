@@ -64,7 +64,7 @@ void Field::Draw(void* gr)
 coll Field::Collision(const xy& start, xy& end)
 {
 	coll ret = border->Collision(start, end);
-	//if (ret.point.x == 10.f)
+	//if (ret.point.x != 10.f)
 	//	return ret; // если бордер вернул коллизию, то не проверяем остальное?
 
 	// Get From Map
@@ -84,10 +84,11 @@ coll Field::Collision(const xy& start, xy& end)
 		{
 			if (y.find(p) != y.end()) // мы нашли тот же указатель
 			{
-				coll tmp = p->Collision(start, end);
-				if (tmp.normal.len2() > 0.f)
-					if (ret.point.dist2(start) > tmp.point.dist2(start)) // если новая найденная коллизия ближе к началу. Такое может быть
-						ret = tmp;
+				coll tmp(p->Collision(start, end));
+				if (tmp.point.dist2(start) < ret.point.dist2(start))
+					ret = tmp;
+				//if (ret.point.x != 10.f)
+				//	return ret; // если бордер вернул коллизию, то не проверяем остальное?
 			}
 		}
 	}
@@ -97,17 +98,16 @@ coll Field::Collision(const xy& start, xy& end)
 		{
 			if (x.find(p) != x.end()) // мы нашли тот же указатель
 			{
-				coll tmp = p->Collision(start, end);
-				if (tmp.normal.len2() > 0.f)
-					if (ret.point.dist2(start) > tmp.point.dist2(start)) // если новая найденная коллизия ближе к началу. Такое может быть
-						ret = tmp;
+				coll tmp(p->Collision(start, end));
+				if (tmp.point.dist2(start) < ret.point.dist2(start))
+					ret = tmp;
+				//if (ret.point.x != 10.f)
+				//	return ret; // если бордер вернул коллизию, то не проверяем остальное?
 			}
 		}
 	}
 	// Get From Map
 
-	if (ret.normal.len2() > 0.f)
-		end = ret.point;
 	return ret;
 }
 #endif // !FIELD
@@ -127,18 +127,83 @@ void Zone::Draw(void* gr)
 
 coll Zone::Collision(const xy& start, xy& end)
 {
-	if (end.dist2(point) < radius2)
-	{
-		coll rez(end, xy(end.x - point.x, end.y - point.y));
-		rez.normal.x /= radius;
-		rez.normal.y /= radius;
-		return rez;
+	//starts:
+	xy point_ = this->point;
+	xy start_ = start;
+	xy end_ = end;
+	if (start.x - end.x < start.y - end.y) // если разница по x меньше разницы по y, то есть прямая стремится быть вертикальной
+	{ // то тогда меняем координаты местами
+		swap(point_.x, point_.y);
+		swap(start_.x, start_.y);
+		swap(end_.x, end_.y);
 	}
-	// TODO: запилить реализацию коллизии
-	// На входе старая и новая точка
-	// Если коллизия есть, то вернуть её и нормаль к поверхности
-	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
-	return coll(end, xy00);
+	double a = (start_.y - end_.y) / (start_.x - end_.x);
+	double b = end_.y - a * end_.x;
+	double ax2 = 1.f + a * a;
+	double bx = (2.f * a * b) - (2.f * point_.x) - (2.f * a * point_.y);
+	double c = point_.x * point_.x + point_.y * point_.y + b * b - radius * radius - 2.f * point_.y * b;
+	double D = bx * bx - 4.f * ax2 * c;
+	double x1, x2, y1, y2;
+	xy p1, p2;
+	if (D < 0.f) // пересечений нет
+		return coll(xyxx, xy00);
+	else
+	if (D == 0.f) // пересечение одно
+	{
+		x1 = (-bx) / (2.f * ax2);
+		y1 = a * x1 + b;
+		p1 = xy(x1, y1);
+		if (p1.dist2(start_) < end_.dist2(start_)) // если это пересечение между начальной и конечной точкой
+		{
+			end_ = p1;
+			if (start.x - end.x < start.y - end.y) // если меняли местами
+			{
+				end.x = end_.y;
+				end.y = end_.x;
+			}
+			else
+			{
+				end = end_;
+			}
+			coll rez(end, xy(end.x - point.x, end.y - point.y));
+			rez.normal.x /= radius;
+			rez.normal.y /= radius;
+			return rez;
+		}
+	}
+	else
+	{
+		x1 = (-bx + sqrt(D)) / (2.f * ax2);
+		x2 = (-bx - sqrt(D)) / (2.f * ax2);
+		y1 = a * x1 + b;
+		y2 = a * x2 + b;
+		p1 = xy(x1, y1);
+		p2 = xy(x2, y2);
+		// проверяем, какая точка ближе к началу
+		if (p1.dist2(start_) > p2.dist2(start_)) // если вторя точка ближе, то сделаем её первой
+			p1 = p2;
+
+		if (p1.dist2(start_) < end_.dist2(start_)) // если это пересечение между начальной и конечной точкой
+		{
+			end_ = p1;
+			if (start.x - end.x < start.y - end.y)
+			{
+				end.x = end_.y;
+				end.y = end_.x;
+			}
+			else
+			{
+				end = end_;
+			}
+			coll rez(end, xy(end.x - point.x, end.y - point.y));
+			rez.normal.x /= radius;
+			rez.normal.y /= radius;
+			return rez;
+		}
+	}
+	//if (end.dist2(point) <= radius2)
+	//	goto starts;
+	return coll(xyxx, xy00);
 }
 #endif // !ZONE
 
@@ -147,24 +212,36 @@ coll Border::Collision(const xy& start, xy& end)
 {
 	if (end.x < 0.f)
 	{
-		return coll(xy(0.f, end.y), xy(1.f, 0.f));
+		float a = (start.y - end.y) / (start.x - end.x);
+		float b = end.y - a * end.x;
+		end.x = 0.f;
+		end.y = b;
+		return coll(end, xy(1.f, 0.f));
 	}
 	if (end.y < 0.f)
 	{
-		return coll(xy(end.x, 0.f), xy(0.f, 1.f));
+		float a = (start.y - end.y) / (start.x - end.x);
+		float b = end.y - a * end.x;
+		end.x = - b / a;
+		end.y = 0.f;
+		return coll(end, xy(0.f, 1.f));
 	}
 	if (end.x > 1.f)
 	{
-		return coll(xy(1.f, end.y), xy(-1.f, 0.f));
+		float a = (start.y - end.y) / (start.x - end.x);
+		float b = end.y - a * end.x;
+		end.x = 1.f;
+		end.y = a + b;
+		return coll(end, xy(-1.f, 0.f));
 	}
 	if (end.y > 1.f)
 	{
-		return coll(xy(end.x, 1.f), xy(0.f, -1.f));
+		float a = (start.y - end.y) / (start.x - end.x);
+		float b = end.y - a * end.x;
+		end.x = (1.f - b) / a;
+		end.y = 1.f;
+		return coll(end, xy(0.f, -1.f));
 	}
-	// TODO: запилить реализацию коллизии
-	// На входе старая и новая точка
-	// Если коллизия есть, то вернуть её и нормаль к поверхности
-	// Если коллизии нет, то вернуть структуру с полем нормали n = 0 (n.x = 0; n.y = 0)
-	return coll(xy(10.0f, 10.0f), xy00);
+	return coll(xyxx, xy00);
 }
 #endif // !BORDER
