@@ -13,7 +13,7 @@
 #include <memory>
 #include <map>
 
-const float dt = 0.01f;
+const float dt = 0.005f;
 const float Fmax = 1.;
 
 const int max_depth = 7;
@@ -42,7 +42,7 @@ struct Rnd
 };
 #endif
 
-const float PI = 3.141592653589793238463f;
+const float PI = 3.141592741f;
 
 using namespace Gdiplus;
 using namespace std;
@@ -91,10 +91,10 @@ const int reg_w = 512;			// размеры регионов
 //const int small_zones[] =	{ 1, 1 };
 //const int small_zones[] =	{ 4, 8 };
 const int small_zones[] =	{ 50, 80 };
-const float small_zone_size[] = { 0.03, 0.05 };
+const float small_zone_size[] = { 0.03f, 0.05f };
 //const int big_zones[] =		{ 1, 1 };
 const int big_zones[] =		{ 4, 8 };
-const float big_zone_size[] = { 0.10, 0.20 };
+const float big_zone_size[] = { 0.10f, 0.20f };
 
 
 const int padding = reg_w / 20;	// отступ

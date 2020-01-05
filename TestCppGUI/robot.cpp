@@ -4,7 +4,7 @@
 
 Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.), c(xyxx,xyxx)
 {
-	//q.Split(0.f, 0.f);
+	q.Split(0.f, 0.f);
 	//q.Split(0.f, 0.f);
 }
 
@@ -56,12 +56,14 @@ void Robot::Simulate(void* gr)
 		xy push(0.f,0.f);
 		// меняем ускорение с учётом отталкивания. может рили его кукошить?
 		push = mipmap.GetA(coord);
+		float push_len = push.len();
 		if (push.len2() > 0.f && speed.len2() > 0.f)
 		{
 			float push_power;
+			
 			a.x /= leaf->power;
 			a.y /= leaf->power;
-			push_power = clamp(-leaf->power * 0.15f, nn * push.len() * cos(speed, push), leaf->power * 0.15f);
+			push_power = clamp(-leaf->power * 0.15f, nn * push_len * cos(speed, push), leaf->power * 0.15f);
 			a.x -= push.x * push_power;
 			a.y -= push.y * push_power;
 			float nnn = a.len();
@@ -79,9 +81,15 @@ void Robot::Simulate(void* gr)
 
 		if (gr)
 		{
+			xy xy10(0.f, 1.f);
+			xy xy2p3(-.86603f, -.5f);
+			xy xy4p3(.86603f, -.5f);
+			float rg = (1.f + cos(push, xy10)) / 2.f;
+			float gg = (1.f + cos(push, xy2p3)) / 2.f;
+			float bg = (1.f + cos(push, xy4p3)) / 2.f;
 			Graphics& graphics = *(Graphics*)gr;
-			SolidBrush br(Color(0, static_cast<int>(push.len() * 255.f), static_cast<int>(push.len() * 255.f)));
-			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 2), (int)((1.f - coord.y) * reg_w + padding) - 2, 5, 5);
+			SolidBrush br(Color(static_cast<int>(rg * push_len * 255.f), static_cast<int>(bg * push_len * 255.f), static_cast<int>(gg * push_len * 255.f)));
+			graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding)) - 1, (int)((1.f - coord.y) * reg_w + padding) - 1, 3, 3);
 			//br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));
 			//graphics.FillEllipse(&br, (int)((coord.x * reg_w + padding) - 2), (int)((1.f - coord.y) * reg_w + padding) - 2, 5, 5);
 			//br.SetColor(Color(0, 0, 0));

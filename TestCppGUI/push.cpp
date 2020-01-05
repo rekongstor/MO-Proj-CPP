@@ -65,15 +65,19 @@ void Mipmap::Draw(void* gr)
 {
 	Graphics& graphics = *(Graphics*)gr;
 	SolidBrush br(Color(0, 0, 255));
-	for (int i = 0; i < l2; ++i)
-		for (int j = 0; j < l2; ++j)
+	for (int i = 0; i < l1; ++i)
+		for (int j = 0; j < l1; ++j)
 		{
-			if (xyl2[i][j].len2() > 0.f)
+			if (xyl1[i][j].len2() > 0.f)
 			{
-				if (j == l2 - 1)
-					j = l2 - 1;
-				br.SetColor(Color((xyl2[i][j].x + 1.f) * (float)(l1 - 1), ((xyl2[i][j].y + 1.f) * (float)(l1 - 1)), 0));
-				graphics.FillEllipse(&br, 2 * padding + reg_w + i * reg_w / l2 - max_depth / 2 + 2, padding + (reg_w - j * reg_w / l2) - max_depth - 2, max_depth + 2, max_depth + 2);
+				xy xy10(0.f, 1.f);
+				xy xy2p3(-.86603f, -.5f);
+				xy xy4p3(.86603f, -.5f);
+				float rg = (1.f+cos(xyl1[i][j],xy10))/2.f;
+				float gg = (1.f+cos(xyl1[i][j], xy2p3))/2.f;
+				float bg = (1.f+cos(xyl1[i][j], xy4p3))/2.f;
+				br.SetColor(Color(rg * 255.f, bg * 255.f, gg * 255.f));
+				graphics.FillEllipse(&br, 2 * padding + reg_w + i * reg_w / l1 - 1, padding + (reg_w - j * reg_w / l1) - 3, 3, 3);
 			}
 		}
 }
