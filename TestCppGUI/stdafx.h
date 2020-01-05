@@ -103,7 +103,7 @@ const Rect r1(padding, padding, reg_w, reg_w);
 const Rect r2(reg_w + 2 * padding, padding, reg_w, reg_w);
 const Rect r3(padding * 3 + reg_w * 2, padding, reg_w, reg_w);
 
-const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement"; //\mPress 'Q' to stop simulation\0";
+const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement\nPress 'D' to download field\nPress 'L' to upload field"; //\mPress 'Q' to stop simulation\0";
 extern Mipmap mipmap;
 
 int Random(int min, int max);

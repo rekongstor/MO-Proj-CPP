@@ -3,6 +3,8 @@
 #include "quadtree.h"
 #include "robot.h"
 #include "push.h"
+#include <iostream>
+#include <fstream>
 #pragma comment (lib,"Gdiplus.lib")
 
 
@@ -18,6 +20,8 @@ Mipmap mipmap;
 array<Robot_p, gen_size> bots[threads];
 bool KeyDown(char key);
 bool want_stop = true;
+HWND hWndEdit, hList;
+int btnSim = 4221, btnGen = 4222, btnSave = 4223;
 
 void Prepare(Graphics& graphics)
 {
@@ -202,6 +206,46 @@ void OnSimulate(HWND hWnd)
 
 }
 
+map<wstring, Field_p> field_list;
+/*
+name point1.x point1.y radius1 point2.x point2.y radius2 ...
+name point1.x point1.y radius1 point2.x point2.y radius2 ...
+*/
+WCHAR buff[1024];
+void OnDownload()
+{
+    // заносим в map наше поле, если в textbox есть что-то
+    GetWindowText(hWndEdit, buff, 1024);
+    wstring name = buff; // получаем текст из бокса
+    if (name.size() > 0)
+    {
+        // занести в map наше текущее поле
+        field_list[name] = field;
+    }
+    // записывам map в наш файл
+    wofstream out("SavedFields.txt", ios::out);
+    wstring s = L"";
+    if (out.is_open())
+    {
+        GetWindowText(hWndEdit, buff, 1024);
+        wstring name = buff; // L"name ";//здесь нужно запрашивать имя
+        for (auto& f : field_list)
+        {
+            wstring tmpl = to_wstring(o->point.x) + L" " + to_wstring(o->point.y) + L" " + to_wstring(o->radius) + L" ";
+            s = s + tmpl;
+        }
+        //fprintf_s(out, "[%s] %s", name, s);
+        out << L"[" << name << s << L"]" << L"\n" << std::endl;
+    }
+    out.close();
+}
+
+void OnLoad()
+{
+
+}
+
+
 bool KeyDown(char key)
 {
     if (Keys.find(key) == Keys.end()) // если клавиша не была нажата
@@ -231,7 +275,6 @@ void Event(HWND hWnd, void(*callback)(HWND))
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
 
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
@@ -272,6 +315,16 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         hInstance,                // program instance handle
         NULL);                    // creation parameters
 
+    HWND hWndLabel = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("static"), TEXT("Save field with name: "),
+        WS_CHILD | WS_VISIBLE, padding - 1, 2, 150,
+        padding - 4, hWnd, NULL, NULL, NULL);
+    hWndEdit = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("edit"), TEXT(""),
+        WS_CHILD | WS_VISIBLE, padding + 150, 2, 100,
+        padding - 4, hWnd, NULL, NULL, NULL);
+
+    hList = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD,
+        reg_w + padding - 100, reg_w + 2 * padding, 100, 80, hWnd, (HMENU)502, hInstance, NULL);
+
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
     while (GetMessage(&msg, NULL, 0, 0))
@@ -290,20 +343,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     HDC          hdc;
     switch (message)
     {
-    case WM_ACTIVATE:
-        Event(hWnd, OnStart);
+    case WM_CREATE:
+        OnGenerate(hWnd);
         return 0;
     case WM_KEYDOWN:
     case WM_KEYUP:
         if (KeyDown('G'))
-            Event(hWnd, OnGenerate);
+            OnGenerate(hWnd);
         if (KeyDown('S'))
-            Event(hWnd, OnSimulate);
-        if (GetKeyState(VK_SHIFT) & 0x8000)
-        {
-            if (KeyDown('1')) // размножить на разные клавиши
-                Event(hWnd, OnSimulate); // сюда вызов нужной функции
-        }
+            OnSimulate(hWnd);
+        if (KeyDown('D'))
+            OnDownload();
+        if (KeyDown('L'))
+            OnLoad();
+
+        //if (GetKeyState(VK_SHIFT) & 0x8000)
+        //{
+        //    if (KeyDown('1')) // размножить на разные клавиши
+        //        Event(hWnd, OnSimulate); // сюда вызов нужной функции
+        //}
         return 0;
     case WM_DESTROY:
         PostQuitMessage(0);
