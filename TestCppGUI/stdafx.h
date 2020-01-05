@@ -87,7 +87,7 @@ struct coll
 	coll(xy point_, xy normal_) : point(point_), normal(normal_) {};
 };
 
-const int reg_w = 512;			// размеры регионов
+const int reg_w = 256;			// размеры регионов
 //const int small_zones[] =	{ 1, 1 };
 //const int small_zones[] =	{ 4, 8 };
 const int small_zones[] =	{ 50, 80 };
@@ -97,11 +97,11 @@ const int big_zones[] =		{ 4, 8 };
 const float big_zone_size[] = { 0.10f, 0.20f };
 
 
-const int padding = reg_w / 20;	// отступ
+const int padding = 20;	// отступ
 
-const Rect r1(padding, padding, reg_w, reg_w);
-const Rect r2(reg_w + 2 * padding, padding, reg_w, reg_w);
-const Rect r3(padding * 3 + reg_w * 2, padding, reg_w, reg_w);
+const Rect r1(padding, padding, reg_w * 2, reg_w * 2);
+const Rect r2(reg_w * 2 + 2 * padding, padding, reg_w, reg_w);
+const Rect r3(reg_w * 2 + 2 * padding, reg_w + padding, reg_w, reg_w);
 
 const WCHAR Tip[] = L"Press 'G' to regenerate field\nPress 'S' to simulate movement\nPress 'D' to download field\nPress 'L' to upload field"; //\mPress 'Q' to stop simulation\0";
 extern Mipmap mipmap;

@@ -18,10 +18,14 @@ Robot_p robot;
 set<char> Keys;
 Mipmap mipmap;
 array<Robot_p, gen_size> bots[threads];
+map<wstring, Field_p> field_list;
 bool KeyDown(char key);
 bool want_stop = true;
 HWND hWndEdit, hList;
-int btnSim = 4221, btnGen = 4222, btnSave = 4223;
+HWND hBtnSave, hBtnLoad, hBtnSim, hBtnGen, hBtnDel;
+const int btnSim = 4221, btnGen = 4222, btnSave = 4223, btnLoad = 4224, btnDel = 4225, listbox = 4226;
+WCHAR buff[1024];
+wstring selected_item = L"";
 
 void Prepare(Graphics& graphics)
 {
@@ -36,16 +40,17 @@ void Prepare(Graphics& graphics)
     graphics.DrawRectangle(&pen, r3);
     graphics.FillRectangle(&br, r3);
 
-    if (want_stop)
-        br.SetColor(Color(0, 0, 0));
-    else
-        br.SetColor(Color(255, 0, 0));
-    FontFamily fontFamily(L"Courier New");
-    Font font(&fontFamily, reg_w / 25, FontStyleBold, UnitPixel);
-    graphics.DrawString(Tip, sizeof(Tip)/2, &font, PointF(padding, reg_w + 2 * padding), &br);
+    //if (want_stop)
+    //    br.SetColor(Color(0, 0, 0));
+    //else
+    //    br.SetColor(Color(255, 0, 0));
+    //FontFamily fontFamily(L"Courier New");
+    //Font font(&fontFamily, reg_w / 25, FontStyleBold, UnitPixel);
+    //graphics.DrawString(Tip, sizeof(Tip)/2, &font, PointF(padding, reg_w + 2 * padding), &br);
 }
 
-void OnStart(HWND hWnd)
+
+void OnPaint(HWND hWnd)
 {
     PAINTSTRUCT  ps;
     HDC          hdc;
@@ -56,31 +61,61 @@ void OnStart(HWND hWnd)
     Region region_1(r1); // первый регион рисования
     Region region_2(r2); // второй регион рисования
     Region region_3(r3); // второй регион рисования
-
+    graphics.SetClip(&region_1);
+    field->Draw(&graphics);
+    if (robot->fin_dist2 < finish_dist2)
+        robot->Simulate(&graphics);
+    graphics.SetClip(&region_2);
+    robot->DrawQT(&graphics);
+    graphics.SetClip(&region_3);
+    mipmap.Draw(&graphics);
 
     EndPaint(hWnd, &ps);
 }
 
-void OnGenerate(HWND hWnd)
+void UpdateList()
 {
-    PAINTSTRUCT  ps;
-    HDC          hdc;
-    InvalidateRect(hWnd, NULL, TRUE);
-    hdc = BeginPaint(hWnd, &ps);
-    Graphics graphics(hdc);
-    Prepare(graphics);
-    Region region_1(r1); // первый регион рисования
-    Region region_2(r2); // второй регион рисования
-    Region region_3(r3); // второй регион рисования
+    SendMessage(hList, LB_RESETCONTENT, 0, 0);
+    for (auto& f : field_list)
+        SendMessage(hList, LB_ADDSTRING, 0, (LPARAM)(LPSTR)(f.first.c_str()));
+    selected_item = L"";
+}
 
-    // рисуем первый регион
-    // поле с препятствиями
-    graphics.SetClip(&region_1);
+void OnStart()
+{
     field = make_shared<Field>();
     robot = make_shared<Robot>();
-    field->Draw(&graphics);
-
-    EndPaint(hWnd, &ps);
+}
+void LoadList()
+{
+    wifstream in("SavedFields.txt", ios::in);
+    if (in.is_open())
+    {
+        while (!in.eof())
+        {
+            wstring name;
+            int size;
+            in >> name >> size;
+            if (name.size() > 0)
+            {
+                field_list[name] = make_shared<Field>();
+                field_list[name]->Clear(); // мы загрузили поле, но оно заполнилось чем-то
+                float x, y, r;
+                for (int i = 0; i < size; ++i)
+                {
+                    in >> x >> y >> r;
+                    field_list[name]->AddZone(xy(x, y), r);
+                }
+            }
+        }
+    }
+    UpdateList();
+}
+void OnGenerate(HWND hWnd)
+{
+    field = make_shared<Field>();
+    robot = make_shared<Robot>();
+    OnPaint(hWnd);
 }
 
 void OnSimulate(HWND hWnd)
@@ -185,7 +220,7 @@ void OnSimulate(HWND hWnd)
     InvalidateRect(hWnd, NULL, TRUE);
     hdc = BeginPaint(hWnd, &ps);
     Graphics graphics(hdc);
-    graphics.Clear(Color::Wheat);
+    graphics.Clear(Color::White);
     Prepare(graphics);
     Region region_1(r1); // первый регион рисования
     Region region_2(r2); // второй регион рисования
@@ -206,13 +241,30 @@ void OnSimulate(HWND hWnd)
 
 }
 
-map<wstring, Field_p> field_list;
 /*
 name point1.x point1.y radius1 point2.x point2.y radius2 ...
 name point1.x point1.y radius1 point2.x point2.y radius2 ...
 */
-WCHAR buff[1024];
-void OnDownload()
+void SaveFile()
+{
+    // записывам map в наш файл
+    wofstream out("SavedFields.txt", ios::out);
+    if (out.is_open())
+    {
+        wstring s = L"";
+        for (auto& f : field_list)
+        {
+            s = f.first + L" " + to_wstring(f.second->obstacles.size()) + L" ";
+            for (auto& o : f.second->obstacles)
+                s = s + to_wstring(o->point.x) + L" " + to_wstring(o->point.y) + L" " + to_wstring(o->radius) + L" ";
+            out << s << endl;
+        }
+        //fprintf_s(out, "[%s] %s", name, s);
+        out.close();
+    }
+}
+
+void OnSave()
 {
     // заносим в map наше поле, если в textbox есть что-то
     GetWindowText(hWndEdit, buff, 1024);
@@ -222,29 +274,28 @@ void OnDownload()
         // занести в map наше текущее поле
         field_list[name] = field;
     }
-    // записывам map в наш файл
-    wofstream out("SavedFields.txt", ios::out);
-    wstring s = L"";
-    if (out.is_open())
-    {
-        GetWindowText(hWndEdit, buff, 1024);
-        wstring name = buff; // L"name ";//здесь нужно запрашивать имя
-        for (auto& f : field_list)
-        {
-            wstring tmpl = to_wstring(o->point.x) + L" " + to_wstring(o->point.y) + L" " + to_wstring(o->radius) + L" ";
-            s = s + tmpl;
-        }
-        //fprintf_s(out, "[%s] %s", name, s);
-        out << L"[" << name << s << L"]" << L"\n" << std::endl;
-    }
-    out.close();
+    SaveFile();
+    UpdateList();
 }
 
-void OnLoad()
+void OnLoad(HWND hWnd)
 {
-
+    if (selected_item.length() > 0)
+    {
+        field.reset();
+        field = make_shared<Field>(*field_list[selected_item]);
+    }
+    OnPaint(hWnd);
 }
 
+void OnDelete()
+{
+    if (selected_item.length() > 0)
+    {
+        field_list.erase(selected_item);
+        OnSave();
+    }
+}
 
 bool KeyDown(char key)
 {
@@ -275,7 +326,6 @@ void Event(HWND hWnd, void(*callback)(HWND))
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 {
@@ -308,23 +358,40 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         WS_OVERLAPPED | WS_SYSMENU,      // window style
         CW_USEDEFAULT,            // initial x position
         CW_USEDEFAULT,            // initial y position
-        reg_w * 3 + 6 * padding,  // initial x size
-        reg_w + 8 * padding,      // initial y size
+        reg_w * 4 + padding * 4,  // initial x size
+        reg_w * 2 + padding * 4,  // initial y size
         NULL,                     // parent window handle
         NULL,                     // window menu handle
         hInstance,                // program instance handle
         NULL);                    // creation parameters
 
-    HWND hWndLabel = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("static"), TEXT("Save field with name: "),
-        WS_CHILD | WS_VISIBLE, padding - 1, 2, 150,
-        padding - 4, hWnd, NULL, NULL, NULL);
-    hWndEdit = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("edit"), TEXT(""),
-        WS_CHILD | WS_VISIBLE, padding + 150, 2, 100,
-        padding - 4, hWnd, NULL, NULL, NULL);
+    HWND hWndLabel = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("static"), TEXT("Save as:"), WS_CHILD | WS_VISIBLE | BS_CENTER | ES_CENTER, 
+        reg_w * 3 + padding * 3, padding, 70, 25, 
+        hWnd, NULL, NULL, NULL);
+    hWndEdit = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("edit"), TEXT(""), WS_CHILD | WS_VISIBLE, 
+        reg_w * 3 + padding * 3 + 70, padding, 80, 25, 
+        hWnd, NULL, NULL, NULL);
+    hBtnSave = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("button"), TEXT("Save"), WS_CHILD | WS_VISIBLE,
+        reg_w * 3 + padding * 3 + 150, padding, 100, 25, 
+        hWnd, (HMENU)btnSave, NULL, NULL);
 
-    hList = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD,
-        reg_w + padding - 100, reg_w + 2 * padding, 100, 80, hWnd, (HMENU)502, hInstance, NULL);
+    hList = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("listbox"), NULL, WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY,
+        reg_w * 3 + padding * 3, padding + 35, 250, 400, 
+        hWnd, (HMENU)listbox, hInstance, NULL);
 
+    hBtnLoad = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("button"), TEXT("Load"), WS_CHILD | WS_VISIBLE,
+        reg_w * 3 + padding * 3, padding + 435, 120, 25, 
+        hWnd, (HMENU)btnLoad, NULL, NULL);
+    hBtnDel = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("button"), TEXT("Delete"), WS_CHILD | WS_VISIBLE,
+        reg_w * 3 + padding * 3 + 130, padding + 435, 120, 25,
+        hWnd, (HMENU)btnDel, NULL, NULL);
+    hBtnGen = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("button"), TEXT("Generate"), WS_CHILD | WS_VISIBLE,
+        reg_w * 3 + padding * 3, padding + 465, 120, 50, 
+        hWnd, (HMENU)btnGen, NULL, NULL);
+    hBtnSim = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("button"), TEXT("Simulate"), WS_CHILD | WS_VISIBLE,
+        reg_w * 3 + padding * 3 + 130, padding + 465, 120, 50, 
+        hWnd, (HMENU)btnSim, NULL, NULL);
+    LoadList();
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
     while (GetMessage(&msg, NULL, 0, 0))
@@ -337,6 +404,12 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
     return msg.wParam;
 }
 
+void SelectItem()
+{
+    SendMessage(hList, LB_GETTEXT, SendMessage(hList, LB_GETCURSEL, 0, 0), (LPARAM)buff);
+    selected_item = buff;
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     WPARAM wParam, LPARAM lParam)
 {
@@ -344,24 +417,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     switch (message)
     {
     case WM_CREATE:
-        OnGenerate(hWnd);
+        OnStart();
         return 0;
-    case WM_KEYDOWN:
-    case WM_KEYUP:
-        if (KeyDown('G'))
-            OnGenerate(hWnd);
-        if (KeyDown('S'))
-            OnSimulate(hWnd);
-        if (KeyDown('D'))
-            OnDownload();
-        if (KeyDown('L'))
-            OnLoad();
 
-        //if (GetKeyState(VK_SHIFT) & 0x8000)
-        //{
-        //    if (KeyDown('1')) // размножить на разные клавиши
-        //        Event(hWnd, OnSimulate); // сюда вызов нужной функции
-        //}
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case listbox:
+            if (HIWORD(wParam) == LBN_SELCHANGE)
+                SelectItem();
+            return 0;
+        case btnGen:
+            OnGenerate(hWnd);
+            return 0;
+        case btnSim:
+            OnSimulate(hWnd);
+            return 0;
+        case btnLoad:
+            OnLoad(hWnd);
+            return 0;
+        case btnDel:
+            OnDelete();
+            return 0;
+        case btnSave:
+            OnSave();
+            return 0;
+        }
+    case WM_PAINT:
+        OnPaint(hWnd);
         return 0;
     case WM_DESTROY:
         PostQuitMessage(0);

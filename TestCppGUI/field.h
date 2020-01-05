@@ -28,6 +28,8 @@ struct Field
 	Field();
 	void Draw(void* graphics);
 	coll Collision(const xy& start, xy& end); // возвращает точку коллизии с препятствиями
+	void AddZone(xy point, float radius);
+	void Clear();
 	void AssignToMap(float point, Zone_p& z, map<float, set<Zone*>>& aabb);
 };
 

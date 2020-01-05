@@ -23,7 +23,7 @@ void QT::Draw(void* gr, float full_time)
 		//if (full_time > 0.f)
 		//	br.SetColor(Color((int)((a.x + 1.f) / 2.f * 255.f), (int)((a.y + 1.f) / 2.f * 255.f), (int)(time / full_time * 255.f)));
 
-		graphics.FillRectangle(&br, 2 * padding + reg_w + (int)(point.x * reg_w), padding + (int)(((1 - point.y - w) * reg_w)), (int)(w * reg_w), (int)(w * reg_w));
+		graphics.FillRectangle(&br, r2.X + (int)(point.x * r2.Width), r2.Y + (int)(((1 - point.y - w) * r2.Height)), (int)(w * r2.Width), (int)(w * r2.Height));
 	}
 }
 void QT::CleanTimes()

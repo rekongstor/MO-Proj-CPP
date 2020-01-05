@@ -35,22 +35,31 @@ void Field::AssignToMap(float point, Zone_p& z, map<float, set<Zone*>>& aabb)
 	}
 }
 
+void Field::Clear()
+{
+	obstacles.clear();
+	aabb_x.clear();
+	aabb_y.clear();
+}
+
+void Field::AddZone(xy point, float radius)
+{
+	obstacles.push_back(make_shared<Zone>(point, radius));
+	auto& obst = obstacles.back();
+	AssignToMap(obst->point.x, obst, aabb_x);
+	AssignToMap(obst->point.y, obst, aabb_y);
+}
+
 Field::Field()
 {
 	border = make_shared<Border>(); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
 	for (int i = Random(small_zones[0], small_zones[1]); i > 0; --i)
 	{
-		obstacles.push_back(make_shared<Zone>(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0]));
-		auto& obst = obstacles.back();
-		AssignToMap(obst->point.x, obst, aabb_x);
-		AssignToMap(obst->point.y, obst, aabb_y);
+		AddZone(xy(Random(), Random()), Random() * (small_zone_size[1] - small_zone_size[0]) + small_zone_size[0]);
 	}	
 	for (int i = Random(big_zones[0], big_zones[1]); i > 0; --i)
 	{
-		obstacles.push_back(make_shared<Zone>(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0]));
-		auto& obst = obstacles.back();
-		AssignToMap(obst->point.x, obst, aabb_x);
-		AssignToMap(obst->point.y, obst, aabb_y);
+		AddZone(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0]);
 	}
 }
 
@@ -117,10 +126,10 @@ void Zone::Draw(void* gr)
 {
 	Graphics& graphics = *(Graphics*)gr;
 	SolidBrush br(Color(255, 0, 0));
-	int pixel_r = radius * reg_w;
+	int pixel_r = radius * r1.Width;
 	graphics.FillEllipse(&br, 
-		padding + (int)(point.x * reg_w) - pixel_r,
-		padding + (int)((1.f - point.y) * reg_w) - pixel_r,
+		r1.X + (int)(point.x * r1.Width) - pixel_r,
+		r1.Y + (int)((1.f - point.y) * r1.Height) - pixel_r,
 		pixel_r * 2,
 		pixel_r * 2);
 }
