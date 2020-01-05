@@ -143,7 +143,7 @@ void OnSimulate(HWND hWnd)
             robot = make_shared<Robot>(*best->best);
             robot->q.Split(robot->coord.x, robot->coord.y);
         }
-
+#ifdef alwaysdraw
         InvalidateRect(hWnd, NULL, TRUE);
         hdc = BeginPaint(hWnd, &ps);
         Graphics graphics(hdc);
@@ -169,7 +169,7 @@ void OnSimulate(HWND hWnd)
         best->mip->Draw(&graphics);
         graphics.SetClip(&region_window);
         EndPaint(hWnd, &ps);
-
+#endif
     }
     want_stop = true;
 

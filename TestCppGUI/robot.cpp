@@ -4,8 +4,8 @@
 
 Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.), c(xyxx,xyxx)
 {
-	q.Split(0.f, 0.f);
-	q.Split(0.f, 0.f);
+	//q.Split(0.f, 0.f);
+	//q.Split(0.f, 0.f);
 }
 
 Robot::Robot(const Robot& r) : coord(r.coord), speed(r.speed), life_time(r.life_time), q(QT(r.q)), fin_dist2(r.fin_dist2), c(r.c)
@@ -44,9 +44,10 @@ void Robot::Simulate(void* gr)
 		coord.x += speed.x * dt;
 		coord.y += speed.y * dt;
 		leaf = q.Get(coord.x, coord.y);
-		if (!leaf->been)
+		if (!leaf->been && !gr)
 		{
 			leaf->Randomize(rand_time);
+			leaf->time = 0.f;
 			leaf->been = true;
 		}
 		xy a = leaf->a; // узнаём ускорение
@@ -60,7 +61,7 @@ void Robot::Simulate(void* gr)
 			float push_power;
 			a.x /= leaf->power;
 			a.y /= leaf->power;
-			push_power = clamp(-.01f, nn * push.len() * cos(speed, push), .01f);
+			push_power = clamp(-leaf->power * 0.15f, nn * push.len() * cos(speed, push), leaf->power * 0.15f);
 			a.x -= push.x * push_power;
 			a.y -= push.y * push_power;
 			float nnn = a.len();

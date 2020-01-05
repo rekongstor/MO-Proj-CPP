@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <map>
 
 const float dt = 0.01f;
 const float Fmax = 1.;
@@ -24,14 +25,15 @@ const int l4 = l3 >> 1;
 const int robot_steps = 4096;
 
 const int threads = 8;
-const int gen_size = 1024 * 4 / threads;
+const int gen_size = 1024 * 32 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
 
 
-#define threading
-#define true_random // не выключать при включенном threading
+#define threading // многопоточка
+#define true_random // рандом через mt19937. Не выключать при включенном threading, иначе нет смысла от нескольких ядер
+#define alwaysdraw // Перерисовывать экран каждое поколение. Если убрать, то алгоритм будет работать быстрее
 
 #ifndef true_random
 struct Rnd

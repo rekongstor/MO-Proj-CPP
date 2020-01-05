@@ -174,7 +174,7 @@ void QT::Randomize(float full_time)
 			power = clamp(0.1f, power + time_coef * time_coef * (Random() - 0.5f), 1.f);
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
+			//time = 0.f;
 		}
-		time = 0.f;
 	}
 }

@@ -22,10 +22,13 @@ struct Border
 struct Field
 {
 	Border_p border;
-	std::vector<Zone_p> obstacles;
+	vector<Zone_p> obstacles;
+	map<float, set<Zone*>> aabb_x;
+	map<float, set<Zone*>> aabb_y;
 	Field();
 	void Draw(void* graphics);
 	coll Collision(const xy& start, xy& end); // возвращает точку коллизии с препятствиями
+	void AssignToMap(float point, Zone_p& z, map<float, set<Zone*>>& aabb);
 };
 
 extern Field_p field;
