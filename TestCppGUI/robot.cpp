@@ -95,9 +95,9 @@ void Robot::Simulate(void* gr)
 			float bg = (1.f + cos(push, xy4p3)) / 2.f;
 			Graphics& graphics = *(Graphics*)gr;
 			SolidBrush br(Color(
-				(rg * 255.f), //clamp(0.f, abs(push_power), 1.f) * 
-				(bg * 255.f), 
-				(gg * 255.f)));
+				(rg * push_len * 255.f), //clamp(0.f, abs(push_power), 1.f) * 
+				(bg * push_len * 255.f),
+				(gg * push_len * 255.f)));
 			//br.SetColor(Color(rg * 255.f, bg * 255.f, gg * 255.f));
 			graphics.FillEllipse(&br, (int)((coord.x * r1.Width + r1.X)) - 2, (int)((1.f - coord.y) * r1.Height + r1.Y) - 2, 5, 5);
 			//br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));
