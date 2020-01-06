@@ -16,22 +16,22 @@ void Mipmap::Put(const xy& coord, const xy& normal)
 		il1[i][j] = 1;
 		xyl1[i][j].x = nx;
 		xyl1[i][j].y = ny;
-		//nx *= 0.5f;
-		//ny *= 0.5f;
+		nx *= 0.5f;
+		ny *= 0.5f;
 		i /= 2;
 		j /= 2;
 		xyl2[i][j].x = ((xyl2[i][j].x * il2[i][j]) + nx) / (il2[i][j] + 1);
 		xyl2[i][j].y = ((xyl2[i][j].y * il2[i][j]) + ny) / (il2[i][j] + 1);
 		++il2[i][j];
-		//nx *= 0.5f;
-		//ny *= 0.5f;
+		nx *= 0.5f;
+		ny *= 0.5f;
 		i /= 2;
 		j /= 2;
 		xyl3[i][j].x = ((xyl3[i][j].x * il3[i][j]) + nx) / (il3[i][j] + 1);
 		xyl3[i][j].y = ((xyl3[i][j].y * il3[i][j]) + ny) / (il3[i][j] + 1);
 		++il3[i][j];
-		//nx *= 0.5f;
-		//ny *= 0.5f;
+		nx *= 0.5f;
+		ny *= 0.5f;
 		i /= 2;
 		j /= 2;
 		xyl4[i][j].x = ((xyl4[i][j].x * il4[i][j]) + nx) / (il4[i][j] + 1);
@@ -42,10 +42,9 @@ void Mipmap::Put(const xy& coord, const xy& normal)
 
 const xy& Mipmap::GetA(const xy& coord)
 {
+sas:
 	int i = (int)(clamp(0.f, coord.x, 1.f) * (float)(l1 - 1));
 	int j = (int)(clamp(0.f, coord.y, 1.f) * (float)(l1 - 1));
-	if (i > 0)
-		int l = 1;
 	int m, n, c;
 	// ниже вектора, которые надо усреднять
 	xy rez;
@@ -69,8 +68,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il2[i + m][j] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl2[i + m][j].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl2[i + m][j].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl2[i + m][j].x) / (c + 1.f) / 2.f;
+			rez.y = ((rez.y * c) + xyl2[i + m][j].y) / (c + 1.f) / 2.f;
 			++c;
 		}
 	}
@@ -78,8 +77,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il2[i][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl2[i][j + n].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl2[i][j + n].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl2[i][j + n].x) / (c + 1.f) / 2.f;
+			rez.y = ((rez.y * c) + xyl2[i][j + n].y) / (c + 1.f) / 2.f;
 			++c;
 		}
 	}
@@ -87,8 +86,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il2[i + m][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl2[i + m][j + n].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl2[i + m][j + n].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl2[i + m][j + n].x) / (c + 1.f) / 2.82f;
+			rez.y = ((rez.y * c) + xyl2[i + m][j + n].y) / (c + 1.f) / 2.82f;
 			++c;
 		}
 	}
@@ -110,8 +109,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il3[i + m][j] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl3[i + m][j].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl3[i + m][j].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl3[i + m][j].x) / (c + 1.f) / 2.f;
+			rez.y = ((rez.y * c) + xyl3[i + m][j].y) / (c + 1.f) / 2.f;
 			++c;
 		}
 	}
@@ -119,8 +118,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il3[i][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl3[i][j + n].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl3[i][j + n].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl3[i][j + n].x) / (c + 1.f) / 2.f;
+			rez.y = ((rez.y * c) + xyl3[i][j + n].y) / (c + 1.f) / 2.f;
 			++c;
 		}
 	}
@@ -128,8 +127,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il3[i + m][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl3[i + m][j + n].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl3[i + m][j + n].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl3[i + m][j + n].x) / (c + 1.f) / 2.82f;
+			rez.y = ((rez.y * c) + xyl3[i + m][j + n].y) / (c + 1.f) / 2.82f;
 			++c;
 		}
 	}
@@ -152,8 +151,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il2[i + m][j] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl4[i + m][j].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl4[i + m][j].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl4[i + m][j].x) / (c + 1.f) / 2.f;
+			rez.y = ((rez.y * c) + xyl4[i + m][j].y) / (c + 1.f) / 2.f;
 			++c;
 		}
 	}
@@ -161,8 +160,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il4[i][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl4[i][j + n].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl4[i][j + n].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl4[i][j + n].x) / (c + 1.f) / 2.f;
+			rez.y = ((rez.y * c) + xyl4[i][j + n].y) / (c + 1.f) / 2.f;
 			++c;
 		}
 	}
@@ -170,8 +169,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il4[i + m][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl4[i + m][j + n].x) / (c + 1.f);
-			rez.y = ((rez.y * c) + xyl4[i + m][j + n].y) / (c + 1.f);
+			rez.x = ((rez.x * c) + xyl4[i + m][j + n].x) / (c + 1.f) / 2.82f;
+			rez.y = ((rez.y * c) + xyl4[i + m][j + n].y) / (c + 1.f) / 2.82f;
 			++c;
 		}
 	}

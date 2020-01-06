@@ -284,6 +284,7 @@ void OnLoad(HWND hWnd)
     {
         field.reset();
         field = make_shared<Field>(*field_list[selected_item]);
+        robot = make_shared<Robot>();
     }
     OnPaint(hWnd);
 }

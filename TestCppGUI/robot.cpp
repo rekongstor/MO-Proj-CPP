@@ -62,14 +62,19 @@ void Robot::Simulate(void* gr)
 		float push_power = 0.f;
 		//if (push_len > 0.f && nn > 0.f)
 		//{
-		//	a.x /= leaf->power;
-		//	a.y /= leaf->power;
 		//	push_power = nn * push_len * cos(speed, push);
-		//	a.x -= push.x * push_power;
-		//	a.y -= push.y * push_power;
-		//	float nnn = a.len();
-		//	a.x = a.x / nnn * leaf->power;
-		//	a.y = a.y / nnn * leaf->power;
+		//	if (push_power < 0.f)
+		//	{
+		//		a.x /= leaf->power;
+		//		a.y /= leaf->power;
+		//		a.x -= push.x * push_power;
+		//		a.y -= push.y * push_power;
+		//		float nnn = a.len();
+		//		a.x = a.x / nnn * leaf->power;
+		//		a.y = a.y / nnn * leaf->power;
+		//	}
+		//	push.x /= push_len;
+		//	push.y /= push_len;
 		//}
 
 		speed.x += Fmax * a.x * dt;

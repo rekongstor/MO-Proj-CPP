@@ -16,8 +16,8 @@
 const float dt = 0.01f;
 const float Fmax = 1.;
 
-const int max_depth = 6;
-const int l1 = 1 << (max_depth + 1);
+const int max_depth = 5;
+const int l1 = 1 << (max_depth + 2);
 const int l2 = l1 >> 1;
 const int l3 = l2 >> 1;
 const int l4 = l3 >> 1;
