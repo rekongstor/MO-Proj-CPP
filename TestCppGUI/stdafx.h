@@ -89,13 +89,13 @@ struct coll
 };
 
 const int reg_w = 256;			// размеры регионов
-const int small_zones[] =	{ 1, 1 };
+//const int small_zones[] =	{ 1, 1 };
 //const int small_zones[] =	{ 4, 8 };
-//const int small_zones[] =	{ 50, 80 };
-const float small_zone_size[] = { 0.03f, 0.05f };
-const int big_zones[] =		{ 1, 1 };
-//const int big_zones[] =		{ 4, 8 };
-const float big_zone_size[] = { 0.10f, 0.20f };
+const int small_zones[] =	{ 100, 160 };
+const float small_zone_size[] = { 0.02f, 0.04f };
+//const int big_zones[] =		{ 1, 1 };
+const int big_zones[] =		{ 3, 6 };
+const float big_zone_size[] = { 0.15f, 0.25f };
 
 
 const int padding = 20;	// отступ
