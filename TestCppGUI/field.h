@@ -23,14 +23,14 @@ struct Field
 {
 	Border_p border;
 	vector<Zone_p> obstacles;
-	map<float, set<Zone*>> aabb_x;
-	map<float, set<Zone*>> aabb_y;
+	map<float, set<Zone*>, greater<float>> aabb_x;
+	map<float, set<Zone*>, greater<float>> aabb_y;
 	Field();
 	void Draw(void* graphics);
 	coll Collision(const xy& start, xy& end); // возвращает точку коллизии с препятствиями
 	void AddZone(xy point, float radius);
 	void Clear();
-	void AssignToMap(float point, Zone_p& z, map<float, set<Zone*>>& aabb);
+	void AssignToMap(float point, Zone_p& z, map<float, set<Zone*>, greater<float>>& aabb);
 };
 
 extern Field_p field;

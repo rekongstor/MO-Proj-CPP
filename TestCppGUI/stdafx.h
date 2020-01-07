@@ -25,7 +25,7 @@ const int l4 = l3 >> 1;
 const int robot_steps = 2048;
 
 const int threads = 8;
-const int gen_size = 1024 * 64 / threads;
+const int gen_size = 1024 * 32 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
@@ -33,7 +33,7 @@ const float finish_dist2 = finish_dist * finish_dist;
 
 #define threading // многопоточка
 #define true_random // рандом через mt19937. Не выключать при включенном threading, иначе нет смысла от нескольких ядер
-//#define alwaysdraw // Перерисовывать экран каждое поколение. Если убрать, то алгоритм будет работать быстрее
+#define alwaysdraw // Перерисовывать экран каждое поколение. Если убрать, то алгоритм будет работать быстрее
 
 #ifndef true_random
 struct Rnd
@@ -88,12 +88,12 @@ struct coll
 };
 
 const int reg_w = 256;			// размеры регионов
-//const int small_zones[] =	{ 1, 1 };
+const int small_zones[] =	{ 1, 1 };
 //const int small_zones[] =	{ 4, 8 };
-const int small_zones[] =	{ 50, 80 };
+//const int small_zones[] =	{ 50, 80 };
 const float small_zone_size[] = { 0.03f, 0.05f };
-//const int big_zones[] =		{ 1, 1 };
-const int big_zones[] =		{ 4, 8 };
+const int big_zones[] =		{ 1, 1 };
+//const int big_zones[] =		{ 4, 8 };
 const float big_zone_size[] = { 0.10f, 0.20f };
 
 
