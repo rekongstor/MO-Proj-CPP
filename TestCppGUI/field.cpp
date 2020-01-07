@@ -87,34 +87,51 @@ coll Field::Collision(const xy& start, xy& end)
 	set<Zone*>& x = it_x->second;
 	set<Zone*>& y = it_y->second;
 
-	if (x.size() < y.size()) // выбираем больший массив
+	auto i_x = x.begin();
+	auto i_y = y.begin();
+	while (i_x != x.end() && i_y != y.end())
 	{
-		for (auto& p : x) // проходим по x, ищем по y: O(x * lg(y))
+		if ((*i_x) == (*i_y))
 		{
-			if (y.find(p) != y.end()) // мы нашли тот же указатель
-			{
-				coll tmp(p->Collision(start, end));
-				if (tmp.point.dist2(start) < ret.point.dist2(start))
-					ret = tmp;
-				//if (ret.point.x != 10.f)
-				//	return ret; // если бордер вернул коллизию, то не проверяем остальное?
-			}
+			coll tmp((*i_x)->Collision(start, end));
+			if (tmp.point.dist2(start) < ret.point.dist2(start))
+				ret = tmp;
+			++i_x;
+			++i_y;
 		}
+		if ((*i_x) < (*i_y))
+			++i_x;
+		else
+			++i_y;
 	}
-	else
-	{
-		for (auto& p : y)// проходим по y, ищем по x: O(y * lg(x))
-		{
-			if (x.find(p) != x.end()) // мы нашли тот же указатель
-			{
-				coll tmp(p->Collision(start, end));
-				if (tmp.point.dist2(start) < ret.point.dist2(start))
-					ret = tmp;
-				//if (ret.point.x != 10.f)
-				//	return ret; // если бордер вернул коллизию, то не проверяем остальное?
-			}
-		}
-	}
+	//if (x.size() < y.size()) // выбираем больший массив
+	//{
+	//	for (auto& p : x) // проходим по x, ищем по y: O(x * lg(y))
+	//	{
+	//		if (y.find(p) != y.end()) // мы нашли тот же указатель
+	//		{
+	//			coll tmp(p->Collision(start, end));
+	//			if (tmp.point.dist2(start) < ret.point.dist2(start))
+	//				ret = tmp;
+	//			//if (ret.point.x != 10.f)
+	//			//	return ret; // если бордер вернул коллизию, то не проверяем остальное?
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	for (auto& p : y)// проходим по y, ищем по x: O(y * lg(x))
+	//	{
+	//		if (x.find(p) != x.end()) // мы нашли тот же указатель
+	//		{
+	//			coll tmp(p->Collision(start, end));
+	//			if (tmp.point.dist2(start) < ret.point.dist2(start))
+	//				ret = tmp;
+	//			//if (ret.point.x != 10.f)
+	//			//	return ret; // если бордер вернул коллизию, то не проверяем остальное?
+	//		}
+	//	}
+	//}
 	// Get From Map
 
 	return ret;
