@@ -65,6 +65,7 @@ void Robot::Simulate(void* gr, bool s)
 	int n = 0;
 	xy old_coord(coord);
 	QT* leaf;
+	float lerp = 0.f;
 	while (!stopped)
 	{
 		if (++n > robot_steps)
@@ -78,6 +79,8 @@ void Robot::Simulate(void* gr, bool s)
 			leaf->Randomize(rand_time);
 			leaf->time = 0.f;
 			leaf->been = true;
+			//if (s)
+			//	lerp = Random();
 		}
 		xy a = leaf->a; // узнаём ускорение
 		
@@ -100,8 +103,8 @@ void Robot::Simulate(void* gr, bool s)
 				a.y -= push.y * push_power / dt;
 				float nnn = a.len();
 				float push_factor = clamp(0.f, -push_power / dt, 1.f) * .5f;
-				a.x = a.x / nnn * (leaf->power + push_factor);
-				a.y = a.y / nnn * (leaf->power + push_factor);
+				a.x = a.x / nnn * (leaf->power * (1.f + lerp) + push_factor * (1.f - lerp));
+				a.y = a.y / nnn * (leaf->power * (1.f + lerp) + push_factor * (1.f - lerp));
 			}
 		}
 

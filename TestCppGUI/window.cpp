@@ -198,7 +198,10 @@ void OnSimulate(HWND hWnd)
             });
             for (auto& r : all_bots)
             {
-                robot->q.Copy((*r)->q);
+                if (!fin)
+                    robot->q.Copy((*r)->q);
+                else
+                    robot->q.Copy(robot->q);
             }
 
 
@@ -236,6 +239,7 @@ void OnSimulate(HWND hWnd)
 
     for (int sp_ups = 0; sp_ups < speed_ups; ++sp_ups)
     {
+        fin = false;
         for (auto& t : thr_cont)
         {
 #ifdef threading
@@ -243,7 +247,7 @@ void OnSimulate(HWND hWnd)
                 [&](void)
             {
 #endif
-                Simulate(t);
+                Simulate(t,true);
 #ifdef threading
             }));
 #endif
@@ -281,7 +285,7 @@ void OnSimulate(HWND hWnd)
         {
             if ((robot->life_time > best->best->life_time) && (best->best->fin_dist2 < finish_dist2)) // если улучшили время, то перезаписываем
                 robot = make_shared<Robot>(*best->best);
-            robot->q.Copy(robot->q);
+
         }
 #ifdef alwaysdraw
         InvalidateRect(hWnd, NULL, TRUE);
