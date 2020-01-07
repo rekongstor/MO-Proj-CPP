@@ -25,7 +25,7 @@ const int l4 = l3 >> 1;
 const int robot_steps = 2048;
 
 const int threads = 8;
-const int gen_size = 1024 * 32 / threads;
+const int gen_size = 1024 * 64 / threads;
 const int max_tries = 512;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;

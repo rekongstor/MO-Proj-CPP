@@ -40,7 +40,6 @@ Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10
 
 Robot::Robot(const Robot& r) : coord(r.coord), speed(r.speed), life_time(r.life_time), q(QT(r.q)), fin_dist2(r.fin_dist2), c(r.c)
 {
-	//q.Split(0.f, 0.f);
 }
 
 Robot::~Robot()
@@ -100,7 +99,7 @@ void Robot::Simulate(void* gr)
 				a.x -= push.x * push_power / dt;
 				a.y -= push.y * push_power / dt;
 				float nnn = a.len();
-				float push_factor = clamp(0.f, push_len, 1.f) * 2.f;
+				float push_factor = clamp(0.f, -push_power / dt, 1.f) * 2.f;//clamp(0.f, push_len, 2.f);// * 2.f;
 				a.x = a.x / nnn * leaf->power * push_factor;
 				a.y = a.y / nnn * leaf->power * push_factor;
 			}
@@ -123,7 +122,7 @@ void Robot::Simulate(void* gr)
 			float gg = (1.f + cos(push, xy2p3)) / 2.f;
 			float bg = (1.f + cos(push, xy4p3)) / 2.f;
 			Graphics& graphics = *(Graphics*)gr;
-			push_len = clamp(0.f, abs(push_len),1.f);
+			push_len = clamp(0.f, -push_power / dt, 1.f);
 			SolidBrush br(Color(
 				(rg * push_len * 255.f), //clamp(0.f, abs(push_power), 1.f) * 
 				(bg * push_len * 255.f),

@@ -45,7 +45,7 @@ const xy& Mipmap::GetA(const xy& coord)
 {
 	int i = (int)(clamp(0.f, coord.x * (float)(l1 - 1), (float)(l1 - 1)));
 	int j = (int)(clamp(0.f, coord.y * (float)(l1 - 1), (float)(l1 - 1)));
-	int m, n, c;
+	int m, n, c, l;
 	// ниже вектора, которые надо усреднять
 	xy rez;
 	xy ret = xy00;
@@ -55,7 +55,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		ret.x = xyl1[i][j].x * 2.f;
 		ret.y = xyl1[i][j].y * 2.f;
-		return xyl1[i][j];
+		l = 1;
+		//return xyl1[i][j];
 	}
 
 	// поиск во втором уровне
@@ -91,8 +92,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il2[i + m][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl2[i + m][j + n].x) / (c + 1.f) / 2.82f;
-			rez.y = ((rez.y * c) + xyl2[i + m][j + n].y) / (c + 1.f) / 2.82f;
+			rez.x = ((rez.x * c) + xyl2[i + m][j + n].x) / (c + 1.f) / 2.82842f;
+			rez.y = ((rez.y * c) + xyl2[i + m][j + n].y) / (c + 1.f) / 2.82842f;
 			++c;
 		}
 	}
@@ -100,7 +101,9 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		ret.x += rez.x;
 		ret.y += rez.y;
-		//return ret;
+		if (l == 1)
+			return ret;
+		l = 1;
 	}
 
 	// поиск в третьем уровне
@@ -136,8 +139,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il3[i + m][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl3[i + m][j + n].x) / (c + 1.f) / 2.82f;
-			rez.y = ((rez.y * c) + xyl3[i + m][j + n].y) / (c + 1.f) / 2.82f;
+			rez.x = ((rez.x * c) + xyl3[i + m][j + n].x) / (c + 1.f) / 2.82842f;
+			rez.y = ((rez.y * c) + xyl3[i + m][j + n].y) / (c + 1.f) / 2.82842f;
 			++c;
 		}
 	}
@@ -145,7 +148,9 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		ret.x += rez.x;
 		ret.y += rez.y;
-		//return ret;
+		if (l == 1)
+			return ret;
+		l = 1;
 	}
 
 
@@ -182,8 +187,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		if (il4[i + m][j + n] > 0)
 		{
-			rez.x = ((rez.x * c) + xyl4[i + m][j + n].x) / (c + 1.f) / 2.82f;
-			rez.y = ((rez.y * c) + xyl4[i + m][j + n].y) / (c + 1.f) / 2.82f;
+			rez.x = ((rez.x * c) + xyl4[i + m][j + n].x) / (c + 1.f) / 2.82842f;
+			rez.y = ((rez.y * c) + xyl4[i + m][j + n].y) / (c + 1.f) / 2.82842f;
 			++c;
 		}
 	}
@@ -191,7 +196,7 @@ const xy& Mipmap::GetA(const xy& coord)
 	{
 		ret.x += rez.x;
 		ret.y += rez.y;
-		//return ret;
+		return ret;
 	}
 	return ret;
 }
@@ -253,6 +258,6 @@ void Mipmap::Clear()
 		for (auto& j : i)
 			j = 0;
 
-	//Put(xy11, xy11);
+	Put(xy11, xy11);
 	//Put(xy00, xy11);
 }
