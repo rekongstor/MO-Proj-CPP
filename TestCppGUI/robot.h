@@ -5,9 +5,9 @@
 struct Robot
 {
 	float fin_dist2;
+	float life_time;
 	xy coord;
 	xy speed;
-	float life_time;
 	coll c;
 
 	QT q;
@@ -16,7 +16,7 @@ struct Robot
 	~Robot();
 	Robot& operator=(const Robot&);
 	void DrawQT(void* gr);
-	void Simulate(void* gr = nullptr, bool s = false);
+	void Simulate(void* gr, bool s);
 };
 
 extern Robot_p robot;

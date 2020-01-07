@@ -65,7 +65,7 @@ void OnPaint(HWND hWnd)
     graphics.SetClip(&region_1);
     field->Draw(&graphics);
     if (robot->fin_dist2 < finish_dist2)
-        robot->Simulate(&graphics);
+        robot->Simulate(&graphics, true);
     graphics.SetClip(&region_2);
     robot->DrawQT(&graphics);
     graphics.SetClip(&region_3);
@@ -221,7 +221,7 @@ void OnSimulate(HWND hWnd)
         graphics.SetClip(&region_1);
         field->Draw(&graphics);
         // рисуем лучшего
-        robot->Simulate(&graphics);
+        robot->Simulate(&graphics, false);
         // рисуем его квадродерево
         graphics.SetClip(&region_2);
         robot->DrawQT(&graphics);
@@ -247,7 +247,7 @@ void OnSimulate(HWND hWnd)
                 [&](void)
             {
 #endif
-                Simulate(t,true);
+                Simulate(t);
 #ifdef threading
             }));
 #endif
@@ -283,7 +283,7 @@ void OnSimulate(HWND hWnd)
         }
         if (best)
         {
-            if ((robot->life_time > best->best->life_time) && (best->best->fin_dist2 < finish_dist2)) // если улучшили время, то перезаписываем
+            if ((robot->life_time > best->best->life_time) && (best->best->fin_dist2 < finish_dist2) && fin) // если улучшили время, то перезаписываем
                 robot = make_shared<Robot>(*best->best);
 
         }
@@ -301,12 +301,13 @@ void OnSimulate(HWND hWnd)
         graphics.SetClip(&region_1);
         field->Draw(&graphics);
         // рисуем лучшего
-        robot->Simulate(&graphics);
+        robot->Simulate(&graphics, false);
         // рисуем его квадродерево
-        graphics.SetClip(&region_2);
-        robot->DrawQT(&graphics);
-        graphics.SetClip(&region_3);
-        mipmap.Draw(&graphics);
+        // можно не рисовать на ускорении
+        //graphics.SetClip(&region_2);
+        //robot->DrawQT(&graphics);
+        //graphics.SetClip(&region_3);
+        //mipmap.Draw(&graphics);
         EndPaint(hWnd, &ps);
 #endif
     }
@@ -325,7 +326,7 @@ void OnSimulate(HWND hWnd)
     graphics.SetClip(&region_1);
     field->Draw(&graphics);
     // рисуем лучшего
-    robot->Simulate(&graphics);
+    robot->Simulate(&graphics, true);
     // рисуем его квадродерево
     graphics.SetClip(&region_2);
     robot->DrawQT(&graphics);

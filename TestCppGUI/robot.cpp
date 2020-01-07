@@ -65,7 +65,7 @@ void Robot::Simulate(void* gr, bool s)
 	int n = 0;
 	xy old_coord(coord);
 	QT* leaf;
-	float lerp = 0.f;
+	float lerp = 1.f;
 	while (!stopped)
 	{
 		if (++n > robot_steps)
@@ -79,9 +79,12 @@ void Robot::Simulate(void* gr, bool s)
 			leaf->Randomize(rand_time);
 			leaf->time = 0.f;
 			leaf->been = true;
-			//if (s)
-			//	lerp = Random();
+			if (s)
+				lerp = Random() + 1.f;
+			leaf->power *= lerp;
 		}
+		if (!gr)
+			lerp = 1.f;
 		xy a = leaf->a; // узнаём ускорение
 		
 		float nn = speed.len();
@@ -103,11 +106,11 @@ void Robot::Simulate(void* gr, bool s)
 				a.y -= push.y * push_power / dt;
 				float nnn = a.len();
 				float push_factor = clamp(0.f, -push_power / dt, 1.f) * .5f;
-				a.x = a.x / nnn * (leaf->power * (1.f + lerp) + push_factor * (1.f - lerp));
-				a.y = a.y / nnn * (leaf->power * (1.f + lerp) + push_factor * (1.f - lerp));
+				a.x = a.x / nnn * ((leaf->power) + (push_factor / lerp));
+				a.y = a.y / nnn * ((leaf->power) + (push_factor / lerp));
 			}
 		}
-
+		
 		speed.x += Fmax * a.x * dt;
 		speed.y += Fmax * a.y * dt;
 		leaf->time = life_time;
@@ -115,8 +118,7 @@ void Robot::Simulate(void* gr, bool s)
 		c = field->Collision(old_coord, coord);
 		if (c.point.x < 9.f)
 			stopped = true;
-
-		if (gr)
+		if (gr && (s || !(n % 50)))
 		{
 			xy xy10(0.f, 1.f);
 			xy xy2p3(-.86603f, -.5f);

@@ -8,9 +8,10 @@ float cos(xy& a, xy& b)
 	return (a.x * b.x + a.y * b.y) / a.len() / b.len();
 }
 
-void Simulate(Container& dest, bool s)
+void Simulate(Container& dest)
 {
 	array<Robot_p, gen_size> &bots = *dest.bots;
+	bool s = (robot->fin_dist2 < finish_dist2);
 	for (int i = 0; i < gen_size; ++i)
 		bots[i] = make_shared<Robot>(*robot);
 

@@ -45,7 +45,7 @@ const xy& Mipmap::GetA(const xy& coord)
 {
 	int i = (int)(clamp(0.f, coord.x * (float)(l1 - 1), (float)(l1 - 1)));
 	int j = (int)(clamp(0.f, coord.y * (float)(l1 - 1), (float)(l1 - 1)));
-	int m, n, c, l;
+	int m, n, c, l = 0;
 	// ниже вектора, которые надо усреднять
 	xy rez;
 	xy ret = xy00;
@@ -210,16 +210,16 @@ void Mipmap::Draw(void* gr)
 	xy xy10(0.f, 1.f);
 	xy xy2p3(-.86603f, -.5f);
 	xy xy4p3(.86603f, -.5f);
-	for (int i = 0; i < l1; ++i)
-		for (int j = 0; j < l1; ++j)
+	for (int i = 0; i < l2; ++i)
+		for (int j = 0; j < l2; ++j)
 		{
-			if (il1[i][j] > 0)
+			if (il2[i][j] > 0)
 			{
-				float rg = (1.f + cos(xyl1[i][j], xy10)) / 2.f;
-				float gg = (1.f + cos(xyl1[i][j], xy2p3)) / 2.f;
-				float bg = (1.f + cos(xyl1[i][j], xy4p3)) / 2.f;
+				float rg = (1.f + cos(xyl2[i][j], xy10)) / 2.f;
+				float gg = (1.f + cos(xyl2[i][j], xy2p3)) / 2.f;
+				float bg = (1.f + cos(xyl2[i][j], xy4p3)) / 2.f;
 				br.SetColor(Color(rg * 255.f, bg * 255.f, gg * 255.f));
-				graphics.FillEllipse(&br, r3.X + i * r3.Width / l1 - 1, r3.Y + (r3.Height - j * r3.Height / l1) - 3, 3, 3);
+				graphics.FillEllipse(&br, r3.X + i * r3.Width / l2 - 1, r3.Y + (r3.Height - j * r3.Height / l2) - 3, 3, 3);
 			}
 		}
 }
