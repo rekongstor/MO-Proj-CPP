@@ -5,7 +5,7 @@ using namespace Gdiplus;
 
 #ifndef FIELD
 
-void Field::AssignToMap(float point, Zone_p& z, map<float, set<Zone*>, greater<float>>& aabb)
+void Field::AssignToMap(float point, Zone_p& z, map<float, vector<Zone*>, greater<float>>& aabb)
 {
 	auto lambda_copy = [&](float key)
 	{
@@ -18,7 +18,7 @@ void Field::AssignToMap(float point, Zone_p& z, map<float, set<Zone*>, greater<f
 			{
 				auto& copy_vec = it->second;
 				for (auto& p : copy_vec)
-					key_vec.insert(p);
+					key_vec.push_back(p);
 			}
 		}
 	};
@@ -31,7 +31,7 @@ void Field::AssignToMap(float point, Zone_p& z, map<float, set<Zone*>, greater<f
 	auto it_end = aabb.find(point + z->radius);
 	for (auto it = it_beg; it != it_end; --it)
 	{
-		it->second.insert(z.get());
+		it->second.push_back(z.get());
 	}
 }
 
@@ -50,6 +50,15 @@ void Field::AddZone(xy point, float radius)
 	AssignToMap(obst->point.y, obst, aabb_y);
 }
 
+void Field::Init()
+{
+	// осталось отсортировать вектора
+	for (auto& v : aabb_x)
+		sort(v.second.begin(), v.second.end());
+	for (auto& v : aabb_y)
+		sort(v.second.begin(), v.second.end());
+}
+
 Field::Field()
 {
 	border = make_shared<Border>(); // создаём одну границу, чтобы можно было проверять её коллизию полиморфно
@@ -61,6 +70,7 @@ Field::Field()
 	{
 		AddZone(xy(Random(), Random()), Random() * (big_zone_size[1] - big_zone_size[0]) + big_zone_size[0]);
 	}
+	Init();
 }
 
 
@@ -86,8 +96,8 @@ coll Field::Collision(const xy& start, xy& end)
 	//--it_x; --it_y;
 	if (it_x == aabb_x.end() || it_y == aabb_y.end())
 		return ret;
-	set<Zone*>& x = it_x->second;
-	set<Zone*>& y = it_y->second;
+	vector<Zone*>& x = it_x->second;
+	vector<Zone*>& y = it_y->second;
 
 	auto i_x = x.begin();
 	auto i_y = y.begin();

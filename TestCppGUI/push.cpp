@@ -53,7 +53,8 @@ const xy& Mipmap::GetA(const xy& coord)
 	// поиск в первом уровне
 	if (il1[i][j] == 1)
 	{
-		ret = xyl1[i][j];
+		ret.x = xyl1[i][j].x * 2.f;
+		ret.y = xyl1[i][j].y * 2.f;
 		return xyl1[i][j];
 	}
 
@@ -97,9 +98,9 @@ const xy& Mipmap::GetA(const xy& coord)
 	}
 	if (c > 0)
 	{
-		return rez;
 		ret.x += rez.x;
 		ret.y += rez.y;
+		//return ret;
 	}
 
 	// поиск в третьем уровне
@@ -142,9 +143,9 @@ const xy& Mipmap::GetA(const xy& coord)
 	}
 	if (c > 0)
 	{
-		return rez;
 		ret.x += rez.x;
 		ret.y += rez.y;
+		//return ret;
 	}
 
 
@@ -188,9 +189,9 @@ const xy& Mipmap::GetA(const xy& coord)
 	}
 	if (c > 0)
 	{
-		return rez;
 		ret.x += rez.x;
 		ret.y += rez.y;
+		//return ret;
 	}
 	return ret;
 }
@@ -252,6 +253,6 @@ void Mipmap::Clear()
 		for (auto& j : i)
 			j = 0;
 
-	Put(xy11, xy11);
+	//Put(xy11, xy11);
 	//Put(xy00, xy11);
 }

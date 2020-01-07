@@ -107,6 +107,7 @@ void LoadList()
                     in >> x >> y >> r;
                     field_list[name]->AddZone(xy(x, y), r);
                 }
+                field_list[name]->Init();
             }
         }
     }
