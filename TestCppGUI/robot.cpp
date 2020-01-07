@@ -97,8 +97,8 @@ void Robot::Simulate(void* gr)
 				a.y /= leaf->power;
 				push.x /= push_len;
 				push.y /= push_len;
-				a.x -= push.x * push_power / dt * 0.5f;
-				a.y -= push.y * push_power / dt * 0.5f;
+				a.x -= push.x * push_power / dt;
+				a.y -= push.y * push_power / dt;
 				float nnn = a.len();
 				float push_factor = clamp(0.f, push_len, 1.f) * 2.f;
 				a.x = a.x / nnn * leaf->power * push_factor;
@@ -123,11 +123,11 @@ void Robot::Simulate(void* gr)
 			float gg = (1.f + cos(push, xy2p3)) / 2.f;
 			float bg = (1.f + cos(push, xy4p3)) / 2.f;
 			Graphics& graphics = *(Graphics*)gr;
-			//push_len = clamp(0.f, abs(push_power / dt),1.f);
+			push_len = clamp(0.f, abs(push_len),1.f);
 			SolidBrush br(Color(
 				(rg * push_len * 255.f), //clamp(0.f, abs(push_power), 1.f) * 
-				(gg * push_len * 255.f),
-				(bg * push_len * 255.f)));
+				(bg * push_len * 255.f),
+				(gg * push_len * 255.f)));
 			//br.SetColor(Color(rg * 255.f, bg * 255.f, gg * 255.f));
 			graphics.FillEllipse(&br, (int)((coord.x * r1.Width + r1.X)) - 2, (int)((1.f - coord.y) * r1.Height + r1.Y) - 2, 5, 5);
 			//br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));

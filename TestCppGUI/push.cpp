@@ -43,8 +43,8 @@ void Mipmap::Put(const xy& coord, const xy& normal)
 #pragma optimize( "", off )
 const xy& Mipmap::GetA(const xy& coord)
 {
-	int i = (int)(clamp(0.f, coord.x, 1.f) * (float)(l1 - 1));
-	int j = (int)(clamp(0.f, coord.y, 1.f) * (float)(l1 - 1));
+	int i = (int)(clamp(0.f, coord.x * (float)(l1 - 1), (float)(l1 - 1)));
+	int j = (int)(clamp(0.f, coord.y * (float)(l1 - 1), (float)(l1 - 1)));
 	int m, n, c;
 	// ниже вектора, которые надо усреднять
 	xy rez;
@@ -52,7 +52,10 @@ const xy& Mipmap::GetA(const xy& coord)
 
 	// поиск в первом уровне
 	if (il1[i][j] == 1)
+	{
+		ret = xyl1[i][j];
 		return xyl1[i][j];
+	}
 
 	// поиск во втором уровне
 	c = 0;
@@ -94,7 +97,9 @@ const xy& Mipmap::GetA(const xy& coord)
 	}
 	if (c > 0)
 	{
-		ret = rez;
+		return rez;
+		ret.x += rez.x;
+		ret.y += rez.y;
 	}
 
 	// поиск в третьем уровне
@@ -137,6 +142,7 @@ const xy& Mipmap::GetA(const xy& coord)
 	}
 	if (c > 0)
 	{
+		return rez;
 		ret.x += rez.x;
 		ret.y += rez.y;
 	}
@@ -182,6 +188,7 @@ const xy& Mipmap::GetA(const xy& coord)
 	}
 	if (c > 0)
 	{
+		return rez;
 		ret.x += rez.x;
 		ret.y += rez.y;
 	}
@@ -245,6 +252,6 @@ void Mipmap::Clear()
 		for (auto& j : i)
 			j = 0;
 
-	//Put(xy11, xyxx);
+	Put(xy11, xy11);
 	//Put(xy00, xy11);
 }
