@@ -4,10 +4,10 @@
 
 struct Robot
 {
+	float fin_dist2;
 	xy coord;
 	xy speed;
 	float life_time;
-	float fin_dist2;
 	coll c;
 
 	QT q;

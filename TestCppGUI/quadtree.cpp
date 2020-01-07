@@ -1,6 +1,6 @@
 #include "quadtree.h"
 
-void QT::Draw(void* gr, float full_time)
+void QT::Draw(void* gr, float& full_time)
 {
 	if (child00 != nullptr)
 	{
@@ -17,29 +17,30 @@ void QT::Draw(void* gr, float full_time)
 		float rg = (1.f + cos(a, xy10)) / 2.f;
 		float gg = (1.f + cos(a, xy2p3)) / 2.f;
 		float bg = (1.f + cos(a, xy4p3)) / 2.f;
-		float time_coef = time / full_time * time / full_time;
+		float time_coef = 1.f;// time / full_time * time / full_time;
 		Graphics& graphics = *(Graphics*)gr;
-		SolidBrush br(Color((int)(rg * 255.f * time_coef), (int)(gg * 255.f * time_coef), (int)(bg * 255.f * time_coef)));
+		SolidBrush br(Color((int)(rg * 255.f * time_coef), (int)(bg * 255.f * time_coef), (int)(gg * 255.f * time_coef)));
 		//if (full_time > 0.f)
 		//	br.SetColor(Color((int)((a.x + 1.f) / 2.f * 255.f), (int)((a.y + 1.f) / 2.f * 255.f), (int)(time / full_time * 255.f)));
 
 		graphics.FillRectangle(&br, r2.X + (int)(point.x * r2.Width), r2.Y + (int)(((1 - point.y - w) * r2.Height)), (int)(w * r2.Width), (int)(w * r2.Height));
 	}
 }
-void QT::CleanTimes()
+void QT::CleanTimes(float best_distance)
 {
 	if (child00 != nullptr)
 	{
-		child00->CleanTimes();
-		child01->CleanTimes();
-		child10->CleanTimes();
-		child11->CleanTimes();
+		child00->CleanTimes(best_distance);
+		child01->CleanTimes(best_distance);
+		child10->CleanTimes(best_distance);
+		child11->CleanTimes(best_distance);
 	}
 	else
 	{
 		if (!been)
 			time = 0.f;
-		been = false;
+		else
+			bestest_dist = best_distance;
 	}
 }
 
@@ -55,14 +56,16 @@ QT::QT() :
 	time(0.f),
 	fi(PI/4.f),
 	power(1.f),
-	been(false)
+	been(false),
+	bestest_dist(10.f)
 {}
 
-QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_, bool been_) :
+
+QT::QT(xy point_, float w_, xy& a_, int& depth_, float& time_, float& fi_, float& power_, bool& been_, float& bd) :
 	point(point_),
-	w(w_),
+	w(w_ / 2.f),
 	a(a_),
-	depth(depth_),
+	depth(depth_ + 1),
 	child00(nullptr),
 	child01(nullptr),
 	child10(nullptr),
@@ -70,8 +73,32 @@ QT::QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float pow
 	time(time_),
 	fi(fi_),
 	power(power_),
-	been(been_)
+	been(been_),
+	bestest_dist(bd)
 {}
+
+void QT::Copy(QT& q)
+{
+	// рекурсивно спуститься в листья
+	if (child00 != nullptr)
+	{
+		child00->Copy(*q.child00);
+		child01->Copy(*q.child01);
+		child10->Copy(*q.child10);
+		child11->Copy(*q.child11);
+	}
+	else
+	{
+		if (q.been && (bestest_dist > q.bestest_dist))
+		{
+			a = q.a;
+			fi = q.fi;
+			power = q.power;
+			bestest_dist = q.bestest_dist;
+		}
+		been = false;
+	}
+}
 
 QT::QT(const QT& q):
 	point(q.point),
@@ -85,7 +112,8 @@ QT::QT(const QT& q):
 	time(q.time),
 	fi(q.fi),
 	power(q.power),
-	been(false)
+	been(q.been),
+	bestest_dist(q.bestest_dist)
 {
 	if (q.child00)
 		child00 = make_shared<QT>(*q.child00);
@@ -101,7 +129,7 @@ QT::~QT()
 {
 }
 
-QT* QT::Get(float x_, float y_)
+QT* QT::Get(float& x_, float& y_)
 {
 	if (child00 != nullptr)
 	{
@@ -119,51 +147,55 @@ QT* QT::Get(float x_, float y_)
 	return (this);
 }
 
-void QT::Split(float x_, float y_)
+void QT::Split(float& x_, float& y_)
 {
 	QT* l = Get(x_, y_);
 	if (l->depth < max_depth)
 	{
 		l->child00 = make_shared<QT>(
 			xy(l->point.x, l->point.y), 
-			l->w / 2.f, 
+			l->w, 
 			l->a, 
-			l->depth + 1, 
+			l->depth, 
 			l->time, 
 			l->fi,
 			l->power,
-			l->been);
+			l->been,
+			l->bestest_dist);
 		l->child01 = make_shared<QT>(
 			xy(l->point.x, l->point.y + l->w / 2.f), 
-			l->w / 2.f, 
+			l->w, 
 			l->a, 
-			l->depth + 1, 
+			l->depth, 
 			l->time, 
 			l->fi,
 			l->power,
-			l->been);
+			l->been,
+			l->bestest_dist);
 		l->child10 = make_shared<QT>(
 			xy(l->point.x + l->w / 2.f, l->point.y),
-			l->w / 2.f, 
+			l->w, 
 			l->a, 
-			l->depth + 1, 
+			l->depth, 
 			l->time, 
 			l->fi,
 			l->power,
-			l->been);
+			l->been,
+			l->bestest_dist);
 		l->child11 = make_shared<QT>(
 			xy(l->point.x + l->w / 2.f, l->point.y + l->w / 2.f), 
-			l->w / 2.f, 
+			l->w, 
 			l->a, 
-			l->depth + 1, 
+			l->depth, 
 			l->time, 
 			l->fi,
 			l->power,
-			l->been);
+			l->been,
+			l->bestest_dist);
 	}
 }
 
-void QT::Randomize(float full_time)
+void QT::Randomize(float& full_time)
 {
 	if (full_time > 0.)
 	{
@@ -192,13 +224,23 @@ void QT::Randomize(float full_time)
 			//}
 
 
-			fi += (time_coef * time_coef * (Random() - 0.5f) * PI) + (Random() - 0.5f) * 0.03f / (float)depth;
+			fi += (time_coef * time_coef * time_coef * (Random() - 0.5f) * PI);
+
+			// можно менять листы, где он не был, 
+			// но где будут неудавшиеся роботы из новых поколений - 
+			// это поможет расширить кругозор по оттакливаниям
+			if (time_coef == 0.f)
+				fi += ((Random() - 0.5f) * .25f * PI);
+
+			// 5% листов просто рандомизируем вне зависимости от времени
+			if (Random() < 0.2f) 
+				fi = ((Random()) * 2.f * PI);
 
 			if (fi > 2 * PI)
 				fi -= 2 * PI;
 			if (fi < 0.f)
 				fi += 2 * PI;
-			power = clamp(0.1f, power + time_coef * time_coef * (Random() - 0.5f), 1.f);
+			power = clamp(0.05f, power + time_coef * time_coef * (Random() - 0.5f), 5.f);
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
 			//time = 0.f;

@@ -7,6 +7,7 @@ struct QT
     float w; // место и размеры листа на поле
     int depth;
     float time;
+    float bestest_dist;
     QT_p    child00,
             child01,
             child10,
@@ -15,14 +16,15 @@ struct QT
     float fi; // направление ускорения
     float power; // сила ускорения
     bool been;
-    QT* Get(float x, float y);
-    void Draw(void* graphics, float full_time);
+    QT* Get(float& x, float& y);
+    void Draw(void* graphics, float& full_time);
     QT();
-    QT(xy point_, float w_, xy a_, int depth_, float time_, float fi_, float power_, bool been);
+    QT(xy point_, float w_, xy& a_, int& depth_, float& time_, float& fi_, float& power_, bool& been, float& bd);
     QT(const QT&);
     ~QT();
-    void Split(float x, float y);
-    void Randomize(float full_time);
-    void CleanTimes();
+    void Copy(QT&);
+    void Split(float& x, float& y);
+    void Randomize(float& full_time);
+    void CleanTimes(float best_distance);
 };
 

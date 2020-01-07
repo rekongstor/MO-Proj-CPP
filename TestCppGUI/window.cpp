@@ -17,7 +17,7 @@ Robot_p robot;
 
 set<char> Keys;
 Mipmap mipmap;
-array<Robot_p, gen_size> bots[threads];
+array<array<Robot_p, gen_size>, threads> bots;
 map<wstring, Field_p> field_list;
 bool KeyDown(char key);
 bool want_stop = true;
@@ -26,6 +26,7 @@ HWND hBtnSave, hBtnLoad, hBtnSim, hBtnGen, hBtnDel;
 const int btnSim = 4221, btnGen = 4222, btnSave = 4223, btnLoad = 4224, btnDel = 4225, listbox = 4226;
 WCHAR buff[1024];
 wstring selected_item = L"";
+array<Robot_p*, threads * gen_size> all_bots;
 
 void Prepare(Graphics& graphics)
 {
@@ -115,6 +116,7 @@ void OnGenerate(HWND hWnd)
 {
     field = make_shared<Field>();
     robot = make_shared<Robot>();
+    mipmap.Clear();
     OnPaint(hWnd);
 }
 
@@ -133,6 +135,8 @@ void OnSimulate(HWND hWnd)
 
         // для всех
 		thr_cont[i].bots = &bots[i];
+        for (int j = 0; j < gen_size; ++j)
+            all_bots[i * gen_size + j] = &bots[i][j];
 	}
     mipmap.Clear();
     Container* best = &thr_cont[0];
@@ -185,6 +189,18 @@ void OnSimulate(HWND hWnd)
         if (best)
         {
             robot = make_shared<Robot>(*best->best);
+            // теперь нужно вообще отсортировать лучших от начала до конца и скопировать друг на друга их квадродеревья
+            // сортируем роботов по убыванию расстояния до финиша
+            sort(all_bots.begin(), all_bots.end(), [&](const Robot_p* a, const Robot_p* b) -> bool
+            {
+                return (*a)->fin_dist2 > (*b)->fin_dist2;
+            });
+            for (auto& r : all_bots)
+            {
+                robot->q.Copy((*r)->q);
+            }
+
+
             robot->q.Split(robot->coord.x, robot->coord.y);
         }
 #ifdef alwaysdraw
@@ -209,7 +225,8 @@ void OnSimulate(HWND hWnd)
         if (!fin)
             for (auto& bs : thr_cont)
                 for (auto& b : *bs.bots)
-                    bs.mip->Put(b->coord, b->c.normal);
+                    if (b->c.normal.len2() > 0.f)
+                        bs.mip->Put(b->coord, b->c.normal);
         graphics.SetClip(&region_3);
         best->mip->Draw(&graphics);
         EndPaint(hWnd, &ps);

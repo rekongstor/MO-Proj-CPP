@@ -4,10 +4,38 @@
 
 Robot::Robot(): coord(0.,0.), speed(0.,0.), life_time(0.), q(QT()), fin_dist2(10.), c(xyxx,xyxx)
 {
-	q.Split(0.f, 0.f);
-	q.Split(0.f, 0.f);
-	q.Split(0.f, 0.f);
-	q.Split(0.f, 0.f);
+	// нужно слегка побить дерево сразу
+	float c1 = .5f;
+	float c21 = .25f, c22 = .75f;
+	q.Split(c1, c1); // в середине
+	q.Split(c21, c21); // по новым квадратам
+	q.Split(c21, c22);
+	q.Split(c22, c21);
+	q.Split(c22, c22);
+	// нужно бооольше сплитов!
+	float c31 = .25f - .01f;
+	float c32 = .25f + .01f;
+	float c33 = .75f - .01f;
+	float c34 = .75f + .01f;
+	q.Split(c31, c31); 
+	q.Split(c31, c32); 
+	q.Split(c32, c31); 
+	q.Split(c32, c32); 
+
+	q.Split(c31, c33);
+	q.Split(c31, c34);
+	q.Split(c32, c33);
+	q.Split(c32, c34);
+
+	q.Split(c33, c31);
+	q.Split(c33, c32);
+	q.Split(c34, c31);
+	q.Split(c34, c32);
+
+	q.Split(c33, c33);
+	q.Split(c33, c34);
+	q.Split(c34, c33);
+	q.Split(c34, c34);
 }
 
 Robot::Robot(const Robot& r) : coord(r.coord), speed(r.speed), life_time(r.life_time), q(QT(r.q)), fin_dist2(r.fin_dist2), c(r.c)
@@ -60,22 +88,23 @@ void Robot::Simulate(void* gr)
 		push = mipmap.GetA(coord);
 		float push_len = push.len();
 		float push_power = 0.f;
-		//if (push_len > 0.f && nn > 0.f)
-		//{
-		//	push_power = nn * push_len * cos(speed, push);
-		//	if (push_power < 0.f)
-		//	{
-		//		a.x /= leaf->power;
-		//		a.y /= leaf->power;
-		//		a.x -= push.x * push_power;
-		//		a.y -= push.y * push_power;
-		//		float nnn = a.len();
-		//		a.x = a.x / nnn * leaf->power;
-		//		a.y = a.y / nnn * leaf->power;
-		//	}
-		//	push.x /= push_len;
-		//	push.y /= push_len;
-		//}
+		if (push_len > 0.f && nn > 0.f)
+		{
+			push_power = nn * push_len * cos(speed, push);
+			if (push_power < 0.f)
+			{
+				a.x /= leaf->power;
+				a.y /= leaf->power;
+				push.x /= push_len;
+				push.y /= push_len;
+				a.x -= push.x * push_power / dt * 0.5f;
+				a.y -= push.y * push_power / dt * 0.5f;
+				float nnn = a.len();
+				float push_factor = clamp(0.f, push_len, 1.f) * 2.f;
+				a.x = a.x / nnn * leaf->power * push_factor;
+				a.y = a.y / nnn * leaf->power * push_factor;
+			}
+		}
 
 		speed.x += Fmax * a.x * dt;
 		speed.y += Fmax * a.y * dt;
@@ -94,10 +123,11 @@ void Robot::Simulate(void* gr)
 			float gg = (1.f + cos(push, xy2p3)) / 2.f;
 			float bg = (1.f + cos(push, xy4p3)) / 2.f;
 			Graphics& graphics = *(Graphics*)gr;
+			//push_len = clamp(0.f, abs(push_power / dt),1.f);
 			SolidBrush br(Color(
 				(rg * push_len * 255.f), //clamp(0.f, abs(push_power), 1.f) * 
-				(bg * push_len * 255.f),
-				(gg * push_len * 255.f)));
+				(gg * push_len * 255.f),
+				(bg * push_len * 255.f)));
 			//br.SetColor(Color(rg * 255.f, bg * 255.f, gg * 255.f));
 			graphics.FillEllipse(&br, (int)((coord.x * r1.Width + r1.X)) - 2, (int)((1.f - coord.y) * r1.Height + r1.Y) - 2, 5, 5);
 			//br.SetColor(Color(static_cast<int>((speed.x + 1.f) * 127.f), static_cast<int>((speed.y + 1.f) * 127.f), static_cast<int>(speed.len() * 255.f), 64));

@@ -16,22 +16,22 @@ void Mipmap::Put(const xy& coord, const xy& normal)
 		il1[i][j] = 1;
 		xyl1[i][j].x = nx;
 		xyl1[i][j].y = ny;
-		nx *= 0.75f;
-		ny *= 0.75f;
+		nx *= 0.707f;
+		ny *= 0.707f;
 		i /= 2;
 		j /= 2;
 		xyl2[i][j].x = ((xyl2[i][j].x * il2[i][j]) + nx) / (il2[i][j] + 1);
 		xyl2[i][j].y = ((xyl2[i][j].y * il2[i][j]) + ny) / (il2[i][j] + 1);
 		++il2[i][j];
-		nx *= 0.75f;
-		ny *= 0.75f;
+		nx *= 0.707f;
+		ny *= 0.707f;
 		i /= 2;
 		j /= 2;
 		xyl3[i][j].x = ((xyl3[i][j].x * il3[i][j]) + nx) / (il3[i][j] + 1);
 		xyl3[i][j].y = ((xyl3[i][j].y * il3[i][j]) + ny) / (il3[i][j] + 1);
 		++il3[i][j];
-		nx *= 0.75f;
-		ny *= 0.75f;
+		nx *= 0.707f;
+		ny *= 0.707f;
 		i /= 2;
 		j /= 2;
 		xyl4[i][j].x = ((xyl4[i][j].x * il4[i][j]) + nx) / (il4[i][j] + 1);
@@ -40,14 +40,15 @@ void Mipmap::Put(const xy& coord, const xy& normal)
 	}
 }
 
+#pragma optimize( "", off )
 const xy& Mipmap::GetA(const xy& coord)
 {
-sas:
 	int i = (int)(clamp(0.f, coord.x, 1.f) * (float)(l1 - 1));
 	int j = (int)(clamp(0.f, coord.y, 1.f) * (float)(l1 - 1));
 	int m, n, c;
 	// ниже вектора, которые надо усреднять
 	xy rez;
+	xy ret = xy00;
 
 	// поиск в первом уровне
 	if (il1[i][j] == 1)
@@ -92,7 +93,9 @@ sas:
 		}
 	}
 	if (c > 0)
-		return rez;
+	{
+		ret = rez;
+	}
 
 	// поиск в третьем уровне
 	c = 0;
@@ -133,7 +136,10 @@ sas:
 		}
 	}
 	if (c > 0)
-		return rez;
+	{
+		ret.x += rez.x;
+		ret.y += rez.y;
+	}
 
 
 	// поиск в четвёртом уровне
@@ -175,9 +181,13 @@ sas:
 		}
 	}
 	if (c > 0)
-		return rez;
-	return xy00;
+	{
+		ret.x += rez.x;
+		ret.y += rez.y;
+	}
+	return ret;
 }
+#pragma optimize( "", on )
 
 void Mipmap::Draw(void* gr)
 {
