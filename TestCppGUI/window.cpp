@@ -178,7 +178,7 @@ void OnSimulate(HWND hWnd)
         {
             if (fin)
             {
-                if ((best->best->fin_dist2 > p.best->fin_dist2) && (best->best->life_time > p.best->life_time))
+                if ((p.best->fin_dist2 < finish_dist2) && (best->best->life_time > p.best->life_time))
                     best = &p;
             }
             else
@@ -229,7 +229,80 @@ void OnSimulate(HWND hWnd)
                     if (b->c.normal.len2() > 0.f)
                         bs.mip->Put(b->coord, b->c.normal);
         graphics.SetClip(&region_3);
-        best->mip->Draw(&graphics);
+        mipmap.Draw(&graphics);
+        EndPaint(hWnd, &ps);
+#endif
+    }
+
+    for (int sp_ups = 0; sp_ups < speed_ups; ++sp_ups)
+    {
+        for (auto& t : thr_cont)
+        {
+#ifdef threading
+            thds.push_back(thread(
+                [&](void)
+            {
+#endif
+                Simulate(t);
+#ifdef threading
+            }));
+#endif
+        }
+
+        for (auto& t : thds)
+            t.join();
+        thds.clear();
+
+        best = &thr_cont[0];
+
+        for (auto& b : thr_cont)
+        {
+            if (b.best->fin_dist2 < finish_dist2)
+            {
+                fin = true;
+                best = &b;
+            }
+        }
+
+        for (auto& p : thr_cont)
+        {
+            if (fin)
+            {
+                if ((p.best->fin_dist2 < finish_dist2) && (best->best->life_time > p.best->life_time))
+                    best = &p;
+            }
+            else
+            {
+                if (best->best->fin_dist2 > p.best->fin_dist2)
+                    best = &p;
+            }
+        }
+        if (best)
+        {
+            if ((robot->life_time > best->best->life_time) && (best->best->fin_dist2 < finish_dist2)) // если улучшили время, то перезаписываем
+                robot = make_shared<Robot>(*best->best);
+            robot->q.Copy(robot->q);
+        }
+#ifdef alwaysdraw
+        InvalidateRect(hWnd, NULL, TRUE);
+        hdc = BeginPaint(hWnd, &ps);
+        Graphics graphics(hdc);
+        graphics.Clear(Color::PaleGreen);
+        Prepare(graphics);
+        Region region_1(r1); // первый регион рисования
+        Region region_2(r2); // второй регион рисования
+        Region region_3(r3); // третий регион рисования
+        // рисуем первый регион
+        // поле с препятствиями
+        graphics.SetClip(&region_1);
+        field->Draw(&graphics);
+        // рисуем лучшего
+        robot->Simulate(&graphics);
+        // рисуем его квадродерево
+        graphics.SetClip(&region_2);
+        robot->DrawQT(&graphics);
+        graphics.SetClip(&region_3);
+        mipmap.Draw(&graphics);
         EndPaint(hWnd, &ps);
 #endif
     }

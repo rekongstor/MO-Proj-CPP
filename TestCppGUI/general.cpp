@@ -8,7 +8,7 @@ float cos(xy& a, xy& b)
 	return (a.x * b.x + a.y * b.y) / a.len() / b.len();
 }
 
-void Simulate(Container& dest)
+void Simulate(Container& dest, bool s)
 {
 	array<Robot_p, gen_size> &bots = *dest.bots;
 	for (int i = 0; i < gen_size; ++i)
@@ -21,7 +21,7 @@ void Simulate(Container& dest)
 
 	for (auto& b : bots)
 	{
-		b->Simulate();
+		b->Simulate(nullptr, s);
 		b->q.CleanTimes(b->fin_dist2);
 		if (b->fin_dist2 < finish_dist2)
 		{
@@ -35,7 +35,7 @@ void Simulate(Container& dest)
 	{
 		if (fin) // ищем лучшего по времени
 		{
-			if ((best->fin_dist2 > b->fin_dist2) && (best->life_time > b->life_time))
+			if ((b->fin_dist2 < finish_dist2) && (best->life_time > b->life_time))
 				best = b;
 		}
 		else // ищем лучшего по расстоянию

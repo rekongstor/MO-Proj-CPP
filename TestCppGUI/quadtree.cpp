@@ -239,7 +239,7 @@ void QT::Randomize(float& full_time)
 				fi -= 2 * PI;
 			if (fi < 0.f)
 				fi += 2 * PI;
-			power = clamp(0.05f, power + time_coef * time_coef * (Random() - 0.5f), 5.f);
+			power = clamp(0.05f, power + time_coef * time_coef * (Random() - 0.5f), .5f);
 			a.x = sin(fi) * power;
 			a.y = cos(fi) * power;
 			//time = 0.f;

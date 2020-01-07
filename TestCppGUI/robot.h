@@ -16,7 +16,7 @@ struct Robot
 	~Robot();
 	Robot& operator=(const Robot&);
 	void DrawQT(void* gr);
-	void Simulate(void* gr = nullptr);
+	void Simulate(void* gr = nullptr, bool s = false);
 };
 
 extern Robot_p robot;

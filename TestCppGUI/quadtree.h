@@ -25,6 +25,7 @@ struct QT
     void Copy(QT&);
     void Split(float& x, float& y);
     void Randomize(float& full_time);
+    void Randomize2(float& full_time);
     void CleanTimes(float best_distance);
 };
 

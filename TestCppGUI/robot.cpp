@@ -53,7 +53,7 @@ Robot& Robot::operator=(const Robot& r)
 	return *this;
 }
 
-void Robot::Simulate(void* gr)
+void Robot::Simulate(void* gr, bool s)
 {
 	coord.x = 0.f;
 	coord.y = 0.f;
@@ -99,9 +99,9 @@ void Robot::Simulate(void* gr)
 				a.x -= push.x * push_power / dt;
 				a.y -= push.y * push_power / dt;
 				float nnn = a.len();
-				float push_factor = clamp(0.f, -push_power / dt, 1.f) * 2.f;//clamp(0.f, push_len, 2.f);// * 2.f;
-				a.x = a.x / nnn * leaf->power * push_factor;
-				a.y = a.y / nnn * leaf->power * push_factor;
+				float push_factor = clamp(0.f, -push_power / dt, 1.f) * .5f;
+				a.x = a.x / nnn * (leaf->power + push_factor);
+				a.y = a.y / nnn * (leaf->power + push_factor);
 			}
 		}
 

@@ -27,6 +27,7 @@ const int robot_steps = 2048;
 const int threads = 8;
 const int gen_size = 1024 * 64 / threads;
 const int max_tries = 512;
+const int speed_ups = 20;
 const float finish_dist = 0.01f;
 const float finish_dist2 = finish_dist * finish_dist;
 
@@ -112,6 +113,6 @@ float Random();
 
 float clamp(float min, float x, float max);
 
-void Simulate(Container&);
+void Simulate(Container&, bool s = false);
 
 float cos(xy& a, xy& b);
