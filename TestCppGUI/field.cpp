@@ -99,10 +99,13 @@ coll Field::Collision(const xy& start, xy& end)
 			++i_x;
 			++i_y;
 		}
-		if ((*i_x) < (*i_y))
-			++i_x;
 		else
-			++i_y;
+		{
+			if ((*i_x) < (*i_y))
+				++i_x;
+			else
+				++i_y;
+		}
 	}
 	//if (x.size() < y.size()) // выбираем больший массив
 	//{

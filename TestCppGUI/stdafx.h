@@ -33,7 +33,7 @@ const float finish_dist2 = finish_dist * finish_dist;
 
 #define threading // многопоточка
 #define true_random // рандом через mt19937. Не выключать при включенном threading, иначе нет смысла от нескольких ядер
-#define alwaysdraw // Перерисовывать экран каждое поколение. Если убрать, то алгоритм будет работать быстрее
+//#define alwaysdraw // Перерисовывать экран каждое поколение. Если убрать, то алгоритм будет работать быстрее
 
 #ifndef true_random
 struct Rnd
